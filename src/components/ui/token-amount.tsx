@@ -17,18 +17,15 @@ function formatBaseUnits(
   const whole = abs / base
   const frac = abs % base
 
-  const wholeStr = new Intl.NumberFormat(locale).format(whole)
-  if (frac === 0n || maxFractionDigits === 0) {
+  const nf = new Intl.NumberFormat(locale)
+  const wholeStr = nf.format(whole)
+  if (maxFractionDigits === 0) {
     return `${negative ? "-" : ""}${wholeStr}`
   }
-  const fracStr = frac
-    .toString()
-    .padStart(decimals, "0")
-    .slice(0, maxFractionDigits)
-    .replace(/0+$/, "")
-  return fracStr
-    ? `${negative ? "-" : ""}${wholeStr}.${fracStr}`
-    : `${negative ? "-" : ""}${wholeStr}`
+  // Fixed fraction digits (25.00, not 25) and the locale's decimal separator (25,00 in French).
+  const sep = nf.formatToParts(1.5).find((p) => p.type === "decimal")?.value ?? "."
+  const fracStr = frac.toString().padStart(decimals, "0").slice(0, maxFractionDigits).padEnd(maxFractionDigits, "0")
+  return `${negative ? "-" : ""}${wholeStr}${sep}${fracStr}`
 }
 
 function formatUsd(

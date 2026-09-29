@@ -13,7 +13,8 @@ const fr: Dictionary = {
   common: {
     product: "Reffinity",
     byMonark: "par Monark",
-    homeLabel: "Reffinity par Monark, accueil",
+    homeLabel: "Reffinity, par Monark : accueil",
+    demoChip: "Démo",
     skip: "Aller au contenu",
     nav: { label: "Principale", overview: "Aperçu", how: "Fonctionnement", demo: "Démo", credits: "Crédits" },
     launchDemo: "Lancer la démo",
@@ -28,6 +29,7 @@ const fr: Dictionary = {
     footer: {
       product: "Des liens de parrainage liés à votre portefeuille, qui récompensent vos invitations quand les gens participent vraiment.",
       productNav: "Pages de Reffinity",
+      builtBy: "Reffinity est conçu par Monark",
       monarkHome: "Page d'accueil de Monark",
       tagline: "Favoriser la collaboration au sein de la communauté Web3",
       projectPage: "Page du projet sur monark.io",

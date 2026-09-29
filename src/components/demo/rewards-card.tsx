@@ -1,6 +1,6 @@
 "use client"
 
-import { toast } from "sonner"
+import { useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import { TokenAmount } from "@/components/ui/token-amount"
@@ -22,6 +22,7 @@ export function RewardsCard() {
   const demo = useDemo()
   const { app, locale, disclaimer } = useAppCopy()
   const tx = useTx()
+  const [claimedText, setClaimedText] = useState<string | undefined>(undefined)
   if (!demo) return null
   const r = app.rewards
   const tot = totals(demo)
@@ -42,7 +43,8 @@ export function RewardsCard() {
       },
       (hash) => {
         applyClaim(amount, hash)
-        toast.success(t(r.done, { amount: text }))
+        // Confirmed inline in the card (no toast over the numbers it reports on).
+        setClaimedText(t(r.done, { amount: text }))
       }
     )
   }
@@ -75,19 +77,17 @@ export function RewardsCard() {
           <dd className="mt-0.5 font-bold tabular-nums text-warning">{formatReward(tot.held, locale)}</dd>
         </div>
       </dl>
-      {claimable > 0n || tx.state.phase !== "idle" ? (
-        <div className="mt-5 flex flex-col gap-3">
-          {claimable > 0n ? (
-            <Button size="lg" className="w-full" onClick={claim} disabled={tx.busy}>
-              {t(r.claim, { amount: formatReward(claimable, locale) })}
-            </Button>
-          ) : null}
-          <TxFeedback state={tx.state} pendingLabel={r.pending} onRetry={claimable > 0n ? claim : undefined} onDismiss={tx.reset} />
-          <Disclaimer text={disclaimer} />
-        </div>
-      ) : (
-        <p className="mt-5 rounded-2xl border border-dashed p-4 text-sm text-muted-foreground">{r.empty}</p>
-      )}
+      <div className="mt-5 flex flex-col gap-3">
+        {claimable > 0n ? (
+          <Button size="lg" className="w-full" onClick={claim} disabled={tx.busy}>
+            {t(r.claim, { amount: formatReward(claimable, locale) })}
+          </Button>
+        ) : (
+          <p className="rounded-2xl border border-dashed p-4 text-sm text-muted-foreground">{r.empty}</p>
+        )}
+        <TxFeedback state={tx.state} pendingLabel={r.pending} confirmedLabel={claimedText} onRetry={claimable > 0n ? claim : undefined} onDismiss={tx.reset} />
+        {claimable > 0n || tx.state.phase !== "idle" ? <Disclaimer text={disclaimer} /> : null}
+      </div>
       <p className="mt-4 text-xs text-muted-foreground">
         {t(r.pool, { used: formatReward(used, locale), total: formatReward(PROGRAM.poolTotal, locale) })}
       </p>

@@ -18,20 +18,20 @@ export function RecordDiagram({
         {/* Inviter */}
         <circle cx="90" cy="70" r="34" className="fill-card stroke-primary" strokeWidth="2.5" />
         <circle cx="90" cy="70" r="12" className="fill-primary" />
-        <text x="90" y="130" textAnchor="middle" className="fill-foreground text-[15px] font-bold">
+        <text x="136" y="76" className="fill-foreground text-[15px] font-bold">
           {labels.inviter}
         </text>
         {/* Invitee */}
         <circle cx="90" cy="200" r="26" className="fill-card stroke-primary" strokeWidth="2.5" strokeDasharray="0" />
         <circle cx="90" cy="200" r="8" className="fill-foreground" />
-        <text x="130" y="232" className="fill-foreground text-[15px] font-bold">
+        <text x="126" y="228" className="fill-foreground text-[15px] font-bold">
           {labels.invitee}
         </text>
         {/* Code link from inviter to invitee */}
         <path d="M 90 104 L 90 172" className="stroke-muted-foreground" strokeWidth="2" strokeDasharray="4 6" strokeLinecap="round" fill="none" />
         {/* Accept call */}
         <path d="M 118 196 C 220 196, 240 130, 318 130" className="stroke-primary" strokeWidth="2.5" fill="none" strokeLinecap="round" markerEnd="url(#rd-arrow)" />
-        <text x="232" y="190" className="fill-muted-foreground text-[13px]">
+        <text x="170" y="252" className="fill-muted-foreground text-[13px] italic">
           {labels.accepts}
         </text>
         {/* Contract */}

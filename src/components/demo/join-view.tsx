@@ -133,6 +133,7 @@ export function JoinView({ code }: { code: string }) {
   const again = () => {
     tx.reset()
     setResult(null)
+    setPersona("friend")
     setFriend(freshFriend([...demo.invites.map((i) => i.name)]))
     setBurst({ name: "", address: randomAddress(), signals: burstSignals() })
   }

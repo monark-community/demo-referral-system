@@ -14,7 +14,8 @@ const en = {
   common: {
     product: "Reffinity",
     byMonark: "by Monark",
-    homeLabel: "Reffinity by Monark, home",
+    homeLabel: "Reffinity, by Monark: home",
+    demoChip: "Demo",
     skip: "Skip to content",
     nav: { label: "Main", overview: "Overview", how: "How it works", demo: "Demo", credits: "Credits" },
     launchDemo: "Launch demo",
@@ -29,6 +30,7 @@ const en = {
     footer: {
       product: "Wallet-bound referral links that reward the people you bring when they actually take part.",
       productNav: "Reffinity pages",
+      builtBy: "Reffinity is built by Monark",
       monarkHome: "Monark home page",
       tagline: "Fostering Collaboration within the Web3 Community",
       projectPage: "Project page on monark.io",

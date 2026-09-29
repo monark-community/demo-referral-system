@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import type { Locale } from "@/i18n/config"
 
+import { DemoChip } from "./demo-chip"
 import { HeaderAction, type WalletLabels } from "./header-action"
 import { LocaleSwitch } from "./locale-switch"
 import { NavLinks, type NavItem } from "./nav-links"
@@ -33,13 +34,15 @@ export function MobileMenu({
     language: string
     names: Record<Locale, string>
     short: Record<Locale, string>
+    demoChip: string
+    demoBadge: string
   }
 }) {
   const [open, setOpen] = useState(false)
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" aria-label={labels.open} className="md:hidden">
+        <Button variant="ghost" size="icon" aria-label={labels.open}>
           <MenuIcon className="size-5" aria-hidden="true" />
         </Button>
       </SheetTrigger>
@@ -49,10 +52,11 @@ export function MobileMenu({
           <SheetDescription className="sr-only">{labels.description}</SheetDescription>
         </SheetHeader>
         <nav aria-label={labels.title} className="flex-1 overflow-y-auto px-3 py-4">
-          <NavLinks items={items} className="flex flex-col gap-1" itemClassName="h-12 w-full px-4 text-base" onNavigate={() => setOpen(false)} />
+          <NavLinks items={items} className="flex flex-col gap-1" itemClassName="h-12 w-full rounded-full px-4 text-base" onNavigate={() => setOpen(false)} />
         </nav>
         <div className="flex flex-col gap-4 border-t px-5 py-5 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
           <div className="flex items-center justify-between gap-3">
+            <DemoChip label={labels.demoChip} title={labels.demoBadge} />
             <LocaleSwitch locale={locale} label={labels.language} names={labels.names} short={labels.short} />
             <ThemeToggle label={labels.theme} />
           </div>

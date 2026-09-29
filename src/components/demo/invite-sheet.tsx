@@ -1,8 +1,7 @@
 "use client"
 
 import { CheckIcon, CircleDashedIcon, ShieldCheckIcon } from "lucide-react"
-import { useEffect } from "react"
-import { toast } from "sonner"
+import { useEffect, useState } from "react"
 
 import { TrustGauge } from "@/components/diagrams/trust-gauge"
 import { Button } from "@/components/ui/button"
@@ -29,6 +28,7 @@ export function InviteSheet({ inviteId, onClose }: { inviteId: string | null; on
   const tx = useTx()
   const invite = demo?.invites.find((i) => i.id === inviteId) ?? null
   const { reset } = tx
+  const [done, setDone] = useState<{ inviteId: string; title: string; detail?: string; held: boolean } | null>(null)
 
   // A different invite starts with a clean transaction state.
   useEffect(() => {
@@ -48,6 +48,7 @@ export function InviteSheet({ inviteId, onClose }: { inviteId: string | null; on
     const def = MILESTONES.find((m) => m.id === next)!
     const label = app.milestones[next].label
     const before = getDemo() ? yourRank(getDemo()!) : 0
+    setDone(null)
     void tx.run(
       {
         title: app.summaries.milestone,
@@ -62,13 +63,17 @@ export function InviteSheet({ inviteId, onClose }: { inviteId: string | null; on
       },
       (hash) => {
         applyMilestone(invite.id, next, hash)
+        // Reported inside the sheet (not as a toast), so nothing covers the timeline it describes.
         if (held) {
-          toast(t(s.heldDone, { milestone: label, name: displayName }))
+          setDone({ inviteId: invite.id, title: t(s.heldDone, { milestone: label, name: displayName }), held: true })
           return
         }
         const after = getDemo() ? yourRank(getDemo()!) : 0
-        toast.success(t(s.milestoneDone, { milestone: label, name: displayName }), {
-          description: [t(s.pointsGained, { points: def.points }), after && after < before ? t(s.movedUp, { rank: after }) : ""].filter(Boolean).join(" "),
+        setDone({
+          inviteId: invite.id,
+          title: t(s.milestoneDone, { milestone: label, name: displayName }),
+          detail: [t(s.pointsGained, { points: def.points }), after && after < before ? t(s.movedUp, { rank: after }) : ""].filter(Boolean).join(" "),
+          held: false,
         })
       }
     )
@@ -175,6 +180,22 @@ export function InviteSheet({ inviteId, onClose }: { inviteId: string | null; on
                   })}
                 </ol>
               </section>
+
+              {done && done.inviteId === invite.id ? (
+                <p
+                  role="status"
+                  className={cn(
+                    "flex items-start gap-2.5 rounded-2xl border p-4 text-sm",
+                    done.held ? "border-warning/50 bg-warning/10" : "border-success/40 bg-success/10"
+                  )}
+                >
+                  <CheckIcon className={cn("mt-0.5 size-4 shrink-0", done.held ? "text-warning" : "text-success")} aria-hidden="true" />
+                  <span>
+                    <span className="block font-bold">{done.title}</span>
+                    {done.detail ? <span className="block">{done.detail}</span> : null}
+                  </span>
+                </p>
+              ) : null}
 
               {next ? (
                 <section aria-labelledby="sim-h" className="rounded-2xl border bg-secondary/50 p-4">
