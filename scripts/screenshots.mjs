@@ -42,6 +42,18 @@ async function newPage(browser, { locale, w, theme }) {
 
 const tag = (v) => `${v.locale}-${v.w}-${v.theme}`
 const shot = async (page, v, name, fullPage = false) => {
+  if (fullPage) {
+    // Scroll through once so lazy-loaded images are in the full-page capture.
+    await page.evaluate(async () => {
+      const y = window.scrollY
+      for (let p = 0; p < document.body.scrollHeight; p += 600) {
+        window.scrollTo(0, p)
+        await new Promise((r) => setTimeout(r, 60))
+      }
+      window.scrollTo(0, y)
+    })
+    await page.waitForTimeout(400)
+  }
   await page.waitForTimeout(250)
   await page.screenshot({ path: `${OUT}${tag(v)}-${name}.png`, fullPage })
   console.log("  ✓", `${tag(v)}-${name}`)
@@ -81,6 +93,7 @@ async function marketing(page, v) {
     await page.goto(`${BASE}/${v.locale}`, { waitUntil: "networkidle" })
     await page.getByRole("button", { name: T[v.locale].menu }).click()
     await page.getByRole("dialog").waitFor()
+    await page.waitForTimeout(700) // let the sheet finish sliding in
     await shot(page, v, "page-mobile-menu")
   }
 }
