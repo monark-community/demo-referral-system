@@ -81,8 +81,8 @@ All routes live under `/{locale}` (`en`, `fr`); `/` redirects to the visitor's p
 
 **Why the extra pages:** `/how-it-works` exists because the project is explicitly a teaching build (abuse cases, incentive design), and organizers need to see the rules before trusting the leaderboard; it would overload the home page. `/r/[code]` is the other half of the product: a referral system has two sides, and letting visitors open their own link and play the invitee is the only honest way to demo the on-chain record and the abuse rules. `/credits` holds photo credits.
 
-**Header:** "Reffinity by Monark" pairing · Overview · How it works · Demo · EN/FR · theme · "Launch demo" (becomes `connect-wallet` inside the app).
-**Footer:** standard three bands (product line + Overview, How it works, Demo, Credits · Monark logo, tagline, project page, GitHub, socials · © line, "Demo · simulated data", testnet notice, photo credits link).
+**Header** (standard Monark navbar, guidelines §10 as updated on 2026-09-29): butterfly + "Reffinity" on one line (no "by Monark"; aria-label "Reffinity, by Monark: home") · Overview · How it works · Demo, left-aligned after the brand · on the right: Demo chip · EN/FR · theme toggle · "Launch demo" (becomes `connect-wallet` inside the app). Below `lg`: brand + menu button; the sheet holds links, Demo chip, EN/FR, theme and the action.
+**Footer:** standard three bands (product line + Overview, How it works, Demo, Credits · "Reffinity is built by Monark", Monark logo, tagline, project page, GitHub, socials · © line, "Demo · simulated data", testnet notice, photo credits link).
 
 ## 5. Feature highlights
 
@@ -118,7 +118,9 @@ The shipped copy lives in `src/i18n/dictionaries/{en,fr}.ts`; this is the source
 
 | Key | EN | FR |
 |-|-|-|
-| Pairing | Reffinity · by Monark | Reffinity · par Monark |
+| Header brand | Reffinity (aria-label "Reffinity, by Monark: home") | Reffinity (« Reffinity, par Monark : accueil ») |
+| Footer credit | Reffinity is built by Monark | Reffinity est conçu par Monark |
+| Demo chip | Demo | Démo |
 | Nav | Overview · How it works · Demo | Aperçu · Fonctionnement · Démo |
 | Header action | Launch demo | Lancer la démo |
 | Demo badge | Demo · simulated data | Démo · données simulées |
@@ -178,7 +180,9 @@ Colour, type, logo, header and footer follow the guidelines exactly: §3 token b
   1. **A referral travels the network.** When an invite is recorded, its edge draws from your node in 250 ms; when a milestone confirms, a small orange dot travels back along the edge and the points counter ticks up.
   2. **The abuse catch.** On `/r/[code]`, choosing a suspicious persona ends in a plain-language revert or in the trust-score gauge settling in the "held" zone, never in a generic error.
   3. **Clicks vs verified.** On the leaderboard, flipping "Count raw clicks" reorders the rows (a farmed account jumps to first place); flipping back settles them into the verified order.
-- Motion is 150–250 ms ease-out, and `prefers-reduced-motion` turns the graph animations into instant state changes.
+- Motion is 150–250 ms ease-out (the reward dot travels in 500 ms because the motion is the explanation), and `prefers-reduced-motion` turns the graph animations into instant state changes; the hero then shows the loop's final state.
+- **Decision: confirmations are inline, not toasts, where a toast would cover the result.** Milestone confirmations appear inside the invite sheet (a toast top-right covered the sheet's details), and the claim confirmation appears in the rewards card. The reward animation plays when the sheet closes, so it is never hidden behind it. Remaining toasts (tracked link added, demo reset, join registered, copy failure) sit top-right under the header on desktop and full-width under the header on phones, away from the content they report on.
+- **Decision: the demo visitor is Amara Okafor**, an ambassador already three months into the program (8 invites in every status), so the dashboard is alive on first load; "Start from scratch" in the demo controls shows the empty states and the registration flow.
 
 ## 9. Assets
 
