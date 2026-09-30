@@ -131,8 +131,6 @@ export interface TxSummaryRow {
 export interface TxSummary {
   title: string
   rows?: TxSummaryRow[]
-  /** Shows the testnet / not-financial-advice disclaimer. */
-  movesValue?: boolean
   /** Signature only (no network fee). */
   noFee?: boolean
   /** Signing wallet shown in the prompt, when it isn't the connected one (an invitee). */

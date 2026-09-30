@@ -3,6 +3,7 @@
 import { ChevronRightIcon } from "lucide-react"
 import { useState } from "react"
 
+import { Button } from "@/components/ui/button"
 import { t } from "@/i18n/t"
 import { inviteStatus, reachedCount, sortedInvites } from "@/lib/demo/selectors"
 import { useDemo } from "@/lib/demo/store"
@@ -16,17 +17,20 @@ import { MilestoneBar, StatusBadge } from "./status-badge"
 
 type Filter = "all" | InviteStatus
 const FILTERS: Filter[] = ["all", "opened", "joined", "active", "completed", "held"]
+const PAGE = 5
 
 /** Every invite with its status and progress, filterable; a row opens the invite sheet. */
 export function InviteList({ onOpen }: { onOpen: (id: string) => void }) {
   const demo = useDemo()
   const { app, locale } = useAppCopy()
   const [filter, setFilter] = useState<Filter>("all")
+  const [showAll, setShowAll] = useState(false)
   if (!demo) return null
   const inv = app.invites
   const all = sortedInvites(demo)
   const counts = Object.fromEntries(FILTERS.map((f) => [f, f === "all" ? all.length : all.filter((i) => inviteStatus(i) === f).length]))
-  const rows = filter === "all" ? all : all.filter((i) => inviteStatus(i) === filter)
+  const matching = filter === "all" ? all : all.filter((i) => inviteStatus(i) === filter)
+  const rows = showAll ? matching : matching.slice(0, PAGE)
 
   return (
     <section aria-labelledby="invites-title" className="rounded-3xl border bg-card">
@@ -90,6 +94,13 @@ export function InviteList({ onOpen }: { onOpen: (id: string) => void }) {
           })}
         </ul>
       )}
+      {matching.length > PAGE ? (
+        <div className="border-t px-5 py-3 sm:px-6">
+          <Button variant="link" className="px-0" onClick={() => setShowAll((v) => !v)} aria-expanded={showAll}>
+            {showAll ? inv.less : inv.more}
+          </Button>
+        </div>
+      ) : null}
     </section>
   )
 }

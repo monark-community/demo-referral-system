@@ -157,8 +157,8 @@ async function appFlows(page, v) {
   await page.getByRole("radio", { name: /Amara herself/ }).click()
   await page.getByRole("button", { name: "Accept invitation" }).click()
   await page.getByRole("dialog").getByRole("button", { name: "Confirm" }).click()
-  await page.getByText("A wallet can't refer itself. The contract rejected").waitFor({ timeout: 10000 })
-  await page.getByText("A wallet can't refer itself. The contract rejected").scrollIntoViewIfNeeded()
+  await page.getByText("A wallet can't refer itself. Nothing was recorded").waitFor({ timeout: 10000 })
+  await page.getByText("A wallet can't refer itself. Nothing was recorded").scrollIntoViewIfNeeded()
   await shot(page, v, "flow3-self-rejected")
   await page.getByRole("radio", { name: /sign-up burst/ }).click()
   await page.getByRole("button", { name: "Accept invitation" }).click()
@@ -180,6 +180,7 @@ async function appFlows(page, v) {
   await page.waitForTimeout(2200)
   await page.getByRole("button", { name: "Open Sofia" }).click()
   await page.getByRole("button", { name: "Confirm workshop check-in" }).waitFor()
+  await page.waitForTimeout(700) // let the sheet finish sliding in
   await shot(page, v, "flow4-sheet")
   await page.getByRole("button", { name: "Confirm workshop check-in" }).click()
   await prompt(page, "Confirm milestone").getByRole("button", { name: "Confirm" }).click()

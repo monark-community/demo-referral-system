@@ -68,7 +68,8 @@ export function WalletPrompt() {
           </div>
         </dl>
 
-        {prompt?.summary.movesValue ? <Disclaimer text={disclaimer} /> : <p className="text-xs text-muted-foreground">{p.simulated}</p>}
+        {/* The testnet notice lives here, and only here: once per transaction (brand guidelines §11). */}
+        <Disclaimer text={disclaimer} />
 
         <DialogFooter className="flex-col-reverse gap-2 sm:flex-row sm:justify-end sm:space-x-0">
           <Button variant="outline" size="lg" onClick={() => prompt?.resolve(false)}>

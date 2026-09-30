@@ -3,11 +3,12 @@
 import { CircleAlertIcon, TriangleAlertIcon } from "lucide-react"
 import { useState } from "react"
 
+import { InfoTip } from "@/components/ui/info-tip"
 import { WalletAvatar } from "@/components/ui/wallet"
 import { t } from "@/i18n/t"
 import { leaderboard } from "@/lib/demo/selectors"
 import { useDemo } from "@/lib/demo/store"
-import { formatNumber, shortAddress } from "@/lib/format"
+import { formatNumber } from "@/lib/format"
 import { cn } from "@/lib/utils"
 
 import { useAppCopy } from "./app-provider"
@@ -32,8 +33,11 @@ export function LeaderboardView() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-display sm:text-4xl">{l.title}</h1>
-          <p className="mt-2 max-w-2xl text-muted-foreground">{t(l.lead, { program: app.program })}</p>
+          <div className="flex items-center gap-1">
+            <h1 className="text-3xl font-extrabold tracking-display sm:text-4xl">{l.title}</h1>
+            <InfoTip label={l.why}>{l.pointsNote}</InfoTip>
+          </div>
+          <p className="mt-1 text-muted-foreground">{app.program}</p>
         </div>
         <div role="radiogroup" aria-label={l.toggleLabel} className="inline-flex self-start rounded-full border bg-card p-1">
           {(["points", "clicks"] as const).map((k) => (
@@ -54,16 +58,15 @@ export function LeaderboardView() {
         </div>
       </div>
 
-      <p
-        aria-live="polite"
-        className={cn(
-          "flex items-start gap-2 rounded-2xl border p-4 text-sm",
-          by === "clicks" ? "border-warning/50 bg-warning/10" : "bg-card text-muted-foreground"
-        )}
-      >
-        {by === "clicks" ? <TriangleAlertIcon className="mt-0.5 size-4 shrink-0 text-warning" aria-hidden="true" /> : null}
-        {by === "clicks" ? l.clicksWarning : l.pointsNote}
-      </p>
+      {/* Only the raw-clicks view needs a word: it shows why Reffinity doesn't rank that way. */}
+      <div aria-live="polite" className="empty:-mt-6">
+        {by === "clicks" ? (
+          <p className="flex items-start gap-2 rounded-2xl border border-warning/50 bg-warning/10 p-4 text-sm">
+            <TriangleAlertIcon className="mt-0.5 size-4 shrink-0 text-warning" aria-hidden="true" />
+            {l.clicksWarning}
+          </p>
+        ) : null}
+      </div>
 
       <section className="overflow-hidden rounded-3xl border bg-card">
         <div className="grid grid-cols-[3rem_1fr_5.5rem] items-center gap-3 border-b px-4 py-3 text-xs font-bold text-muted-foreground sm:grid-cols-[3.5rem_1fr_6rem_6rem_6rem] sm:px-6">
@@ -105,9 +108,7 @@ export function LeaderboardView() {
                       <CircleAlertIcon className="size-3" aria-hidden="true" />
                       {l.flagged}
                     </span>
-                  ) : (
-                    <span className="block truncate font-mono text-xs text-muted-foreground">{shortAddress(r.address)}</span>
-                  )}
+                  ) : null}
                 </span>
               </span>
               <span className={cn("text-right tabular-nums", by === "points" ? "text-lg font-extrabold" : "hidden text-muted-foreground sm:block")}>

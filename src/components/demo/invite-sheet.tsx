@@ -5,6 +5,7 @@ import { useEffect, useState } from "react"
 
 import { TrustGauge } from "@/components/diagrams/trust-gauge"
 import { Button } from "@/components/ui/button"
+import { InfoTip } from "@/components/ui/info-tip"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { WalletAddress } from "@/components/ui/wallet"
 import { t } from "@/i18n/t"
@@ -140,7 +141,6 @@ export function InviteSheet({ inviteId, onClose }: { inviteId: string | null; on
                       ))}
                     </ul>
                   </div>
-                  {held ? <p className="mt-3 text-sm text-warning">{s.heldNote}</p> : null}
                 </section>
               )}
 
@@ -199,11 +199,13 @@ export function InviteSheet({ inviteId, onClose }: { inviteId: string | null; on
 
               {next ? (
                 <section aria-labelledby="sim-h" className="rounded-2xl border bg-secondary/50 p-4">
-                  <h3 id="sim-h" className="flex items-center gap-2 text-sm font-bold">
-                    <ShieldCheckIcon className="size-4 text-primary" aria-hidden="true" />
-                    {s.simulateTitle}
-                  </h3>
-                  <p className="mt-1 text-sm text-muted-foreground">{s.simulateBody}</p>
+                  <div className="-my-1.5 flex items-center justify-between gap-2">
+                    <h3 id="sim-h" className="flex items-center gap-2 text-sm font-bold">
+                      <ShieldCheckIcon className="size-4 text-primary" aria-hidden="true" />
+                      {s.simulateTitle}
+                    </h3>
+                    <InfoTip label={s.simulateWhy}>{s.simulateBody}</InfoTip>
+                  </div>
                   <Button className="mt-3 w-full sm:w-auto" onClick={simulate} disabled={tx.busy}>
                     {app.milestones[next].action}
                   </Button>

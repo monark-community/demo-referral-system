@@ -14,13 +14,12 @@ import { getDemo, useDemo } from "@/lib/demo/store"
 import { formatReward, shortAddress } from "@/lib/format"
 
 import { useAppCopy } from "./app-provider"
-import { Disclaimer } from "./disclaimer"
 import { TxFeedback } from "./tx-feedback"
 
 /** Claimable, claimed and held tUSDC, with the claim transaction (flow 5). */
 export function RewardsCard() {
   const demo = useDemo()
-  const { app, locale, disclaimer } = useAppCopy()
+  const { app, locale } = useAppCopy()
   const tx = useTx()
   const [claimedText, setClaimedText] = useState<string | undefined>(undefined)
   if (!demo) return null
@@ -39,7 +38,6 @@ export function RewardsCard() {
           { label: app.summaries.claimAmount, value: text },
           { label: app.summaries.claimTo, value: shortAddress(demo.wallet.address) },
         ],
-        movesValue: true,
       },
       (hash) => {
         applyClaim(amount, hash)
@@ -86,7 +84,6 @@ export function RewardsCard() {
           <p className="rounded-2xl border border-dashed p-4 text-sm text-muted-foreground">{r.empty}</p>
         )}
         <TxFeedback state={tx.state} pendingLabel={r.pending} confirmedLabel={claimedText} onRetry={claimable > 0n ? claim : undefined} onDismiss={tx.reset} />
-        {claimable > 0n || tx.state.phase !== "idle" ? <Disclaimer text={disclaimer} /> : null}
       </div>
       <p className="mt-4 text-xs text-muted-foreground">
         {t(r.pool, { used: formatReward(used, locale), total: formatReward(PROGRAM.poolTotal, locale) })}

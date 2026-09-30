@@ -1,4 +1,4 @@
-import { ArrowRightIcon, BanIcon, CloudIcon, LinkIcon, RepeatIcon, UserRoundCheckIcon } from "lucide-react"
+import { ArrowRightIcon, BanIcon, ChevronRightIcon, CloudIcon, LinkIcon, RepeatIcon, UserRoundCheckIcon } from "lucide-react"
 import type { Metadata } from "next"
 import Link from "next/link"
 import { notFound } from "next/navigation"
@@ -49,8 +49,7 @@ export default async function HowItWorks({ params }: PageProps<"/[locale]/how-it
   return (
     <>
       <section className="mx-auto w-full max-w-6xl px-4 pt-12 pb-10 sm:px-6 lg:pt-16">
-        <p className="eyebrow text-primary-ink">{d.eyebrow}</p>
-        <h1 className="mt-3 max-w-3xl text-4xl font-extrabold tracking-display sm:text-5xl">{d.title}</h1>
+        <h1 className="max-w-3xl text-4xl font-extrabold tracking-display sm:text-5xl">{d.title}</h1>
         <p className="mt-4 max-w-2xl text-lg text-muted-foreground">{d.lead}</p>
       </section>
 
@@ -106,10 +105,7 @@ export default async function HowItWorks({ params }: PageProps<"/[locale]/how-it
                   <th scope="row" className="px-4 py-4 font-normal sm:px-6">
                     <span className="flex items-center gap-3">
                       <span className="flex size-7 shrink-0 items-center justify-center rounded-full border-2 border-primary text-xs font-bold">{i + 1}</span>
-                      <span>
-                        <span className="block font-bold">{dict.app.milestones[m.id].label}</span>
-                        <span className="block text-xs text-muted-foreground sm:text-sm">{dict.app.milestones[m.id].long}</span>
-                      </span>
+                      <span className="font-bold">{dict.app.milestones[m.id].label}</span>
                     </span>
                   </th>
                   <td className="px-4 py-4 text-right font-bold tabular-nums sm:px-6">+{m.points}</td>
@@ -199,17 +195,21 @@ export default async function HowItWorks({ params }: PageProps<"/[locale]/how-it
           {d.dev.title}
         </h2>
         <p className="mt-3 max-w-2xl text-muted-foreground">{d.dev.body}</p>
-        <pre className="mt-6 overflow-x-auto rounded-2xl border bg-foreground p-5 text-[13px] leading-relaxed text-background" tabIndex={0}>
-          <code translate="no">{EVENTS}</code>
-        </pre>
+        {/* Context on demand: the code sits behind a disclosure. */}
+        <details className="group mt-6">
+          <summary className="inline-flex min-h-11 cursor-pointer list-none items-center gap-1.5 font-bold text-primary-ink underline underline-offset-4 [&::-webkit-details-marker]:hidden">
+            <ChevronRightIcon className="size-4 transition-transform duration-150 group-open:rotate-90" aria-hidden="true" />
+            {d.dev.show}
+          </summary>
+          <pre className="mt-4 overflow-x-auto rounded-2xl border bg-foreground p-5 text-[13px] leading-relaxed text-background" tabIndex={0}>
+            <code translate="no">{EVENTS}</code>
+          </pre>
+        </details>
       </section>
 
       <section className="mx-auto w-full max-w-6xl px-4 pb-16 sm:px-6 lg:pb-24">
         <div className="flex flex-col items-start gap-6 rounded-3xl border bg-secondary p-8 sm:p-10 md:flex-row md:items-center md:justify-between">
-          <div className="max-w-xl">
-            <h2 className="text-3xl font-bold tracking-display">{d.cta.title}</h2>
-            <p className="mt-3 text-lg text-muted-foreground">{d.cta.body}</p>
-          </div>
+          <h2 className="max-w-xl text-3xl font-bold tracking-display">{d.cta.title}</h2>
           <Button asChild size="lg" className="w-full sm:w-auto">
             <Link href={href(locale, "/app")}>
               {d.cta.button}

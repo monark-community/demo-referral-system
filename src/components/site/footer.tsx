@@ -114,10 +114,6 @@ export function SiteFooter({ locale, dict }: { locale: Locale; dict: Dictionary 
           <span aria-hidden="true" className="hidden md:inline">
             ·
           </span>
-          <span>{c.disclaimer}</span>
-          <span aria-hidden="true" className="hidden md:inline">
-            ·
-          </span>
           <Link href={href(locale, "/credits")} className="inline-flex min-h-11 items-center underline underline-offset-4 hover:text-foreground md:min-h-0">
             {f.photos}
           </Link>

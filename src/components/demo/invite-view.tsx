@@ -14,6 +14,7 @@ import { t } from "@/i18n/t"
 import { createLink, deleteLink, validateLinkLabel, type LinkError } from "@/lib/demo/ops"
 import { useDemo } from "@/lib/demo/store"
 import { formatNumber } from "@/lib/format"
+import { cn } from "@/lib/utils"
 
 import { useAppCopy } from "./app-provider"
 import { CopyButton } from "./copy-button"
@@ -25,6 +26,7 @@ export function InviteView() {
   const inv = app.invite
   const [label, setLabel] = useState("")
   const [error, setError] = useState<LinkError | null>(null)
+  const [message, setMessage] = useState(0)
   const inputId = useId()
   const errorId = useId()
 
@@ -44,6 +46,7 @@ export function InviteView() {
   const path = `/${locale}/r/${demo.code}`
   const url = `${SITE_URL}${path}`
   const tagged = (tag: string) => `${url}?via=${tag}`
+  const messageText = t(inv.messages[message]?.text ?? "", { url })
   const pct = new Intl.NumberFormat(intlLocale[locale], { style: "percent", maximumFractionDigits: 0 })
 
   const add = (e: React.FormEvent) => {
@@ -67,10 +70,7 @@ export function InviteView() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-3xl font-extrabold tracking-display sm:text-4xl">{inv.title}</h1>
-        <p className="mt-2 max-w-2xl text-muted-foreground">{inv.lead}</p>
-      </div>
+      <h1 className="text-3xl font-extrabold tracking-display sm:text-4xl">{inv.title}</h1>
 
       <div className="grid gap-6 lg:grid-cols-[7fr_5fr] lg:items-start">
         <div className="flex min-w-0 flex-col gap-6">
@@ -91,7 +91,6 @@ export function InviteView() {
                 </Link>
               </Button>
             </div>
-            <p className="mt-3 text-sm text-muted-foreground">{inv.previewHint}</p>
           </section>
 
           {/* Tracked links */}
@@ -100,7 +99,6 @@ export function InviteView() {
               <h2 id="tracked-title" className="text-lg font-bold">
                 {inv.linksTitle}
               </h2>
-              <p className="mt-1 text-sm text-muted-foreground">{inv.linksBody}</p>
               <form onSubmit={add} noValidate className="mt-4 flex flex-col gap-2">
                 <Label htmlFor={inputId} className="text-sm font-bold">
                   {inv.label}
@@ -174,7 +172,6 @@ export function InviteView() {
             <h2 id="qr-title" className="text-lg font-bold">
               {inv.qrTitle}
             </h2>
-            <p className="mt-1 text-sm text-muted-foreground">{inv.qrBody}</p>
             <div className="mx-auto mt-4 w-full max-w-60 overflow-hidden rounded-2xl border bg-white p-2">
               <QrCode text={url} label={t(inv.qrAlt, { url })} className="block size-full" />
             </div>
@@ -189,19 +186,27 @@ export function InviteView() {
             <h2 id="msg-title" className="text-lg font-bold">
               {inv.messagesTitle}
             </h2>
-            <p className="mt-1 text-sm text-muted-foreground">{inv.messagesBody}</p>
-            <ul className="mt-4 flex flex-col gap-3">
-              {inv.messages.map((m) => {
-                const text = t(m.text, { url })
-                return (
-                  <li key={m.label} className="rounded-2xl border p-4">
-                    <p className="text-xs font-bold text-primary-ink">{m.label}</p>
-                    <p className="mt-1.5 text-sm break-words">{text}</p>
-                    <CopyButton text={text} label={inv.copyMessage} copiedLabel={inv.copied} failedLabel={inv.copyFailed} size="sm" className="mt-3" />
-                  </li>
-                )
-              })}
-            </ul>
+            <div role="radiogroup" aria-label={inv.messagesTitle} className="mt-4 flex flex-wrap gap-1.5">
+              {inv.messages.map((m, i) => (
+                <button
+                  key={m.label}
+                  type="button"
+                  role="radio"
+                  aria-checked={message === i}
+                  onClick={() => setMessage(i)}
+                  className={cn(
+                    "inline-flex h-9 items-center rounded-full border px-3.5 text-sm font-bold transition-colors duration-150",
+                    message === i ? "border-foreground bg-foreground text-background" : "border-input hover:bg-muted"
+                  )}
+                >
+                  {m.label}
+                </button>
+              ))}
+            </div>
+            <div className="mt-3 rounded-2xl border p-4">
+              <p className="text-sm break-words">{messageText}</p>
+              <CopyButton text={messageText} label={inv.copyMessage} copiedLabel={inv.copied} failedLabel={inv.copyFailed} size="sm" className="mt-3" />
+            </div>
           </section>
         </div>
       </div>

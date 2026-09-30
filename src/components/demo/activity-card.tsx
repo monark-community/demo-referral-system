@@ -22,6 +22,8 @@ const ICONS = {
   linkCreated: LinkIcon,
 } as const
 
+const PAGE = 4
+
 /** The on-chain history as the indexer sees it (plus reverted attempts and link changes). */
 export function ActivityCard() {
   const demo = useDemo()
@@ -29,7 +31,7 @@ export function ActivityCard() {
   const [all, setAll] = useState(false)
   if (!demo) return null
   const a = app.activity
-  const items = all ? demo.activity : demo.activity.slice(0, 6)
+  const items = all ? demo.activity : demo.activity.slice(0, PAGE)
 
   const describe = (x: Activity): string => {
     const name = x.name || a.anonymous
@@ -81,15 +83,10 @@ export function ActivityCard() {
                     {describe(x)}
                     {x.kind === "milestone" && x.points ? <span className="ml-1.5 text-xs font-bold text-primary-ink">{t(a.milestoneGain, { points: x.points })}</span> : null}
                   </p>
-                  <p className="flex flex-wrap gap-x-2 text-xs text-muted-foreground">
-                    <time dateTime={x.at} title={formatDateTime(x.at, locale)}>
+                  <p className="text-xs text-muted-foreground">
+                    <time dateTime={x.at} title={[formatDateTime(x.at, locale), x.hash ? `${app.tx.hash}: ${shortHash(x.hash)}` : ""].filter(Boolean).join(" · ")}>
                       {formatRelative(x.at, locale)}
                     </time>
-                    {x.hash ? (
-                      <span className="font-mono" title={`${app.tx.hash}: ${x.hash}`}>
-                        {shortHash(x.hash)}
-                      </span>
-                    ) : null}
                   </p>
                 </div>
               </li>
@@ -97,7 +94,7 @@ export function ActivityCard() {
           })}
         </ol>
       )}
-      {demo.activity.length > 6 ? (
+      {demo.activity.length > PAGE ? (
         <Button variant="link" className="mt-4" onClick={() => setAll((v) => !v)} aria-expanded={all}>
           {all ? a.less : a.more}
         </Button>

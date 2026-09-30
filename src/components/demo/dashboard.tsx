@@ -66,11 +66,11 @@ export function Dashboard() {
       progress: reachedCount(i),
     }))
 
-  const stats = [
-    { label: app.stats.points, value: formatNumber(tot.points, locale), hint: app.stats.pointsHint, tick: true },
-    { label: app.stats.rank, value: t(app.stats.rankValue, { rank, total: PROGRAM.ambassadors }), hint: app.program },
+  const stats: { label: string; value: string; hint?: string; tick?: boolean }[] = [
+    { label: app.stats.points, value: formatNumber(tot.points, locale), tick: true },
+    { label: app.stats.rank, value: t(app.stats.rankValue, { rank, total: PROGRAM.ambassadors }) },
     { label: app.stats.verified, value: formatNumber(tot.verified, locale), hint: t(app.stats.verifiedHint, { opened: tot.opened }) },
-    { label: app.stats.claimable, value: formatReward(tot.claimable, locale), hint: app.stats.claimableHint },
+    { label: app.stats.claimable, value: formatReward(tot.claimable, locale) },
   ]
 
   return (
@@ -95,7 +95,7 @@ export function Dashboard() {
             <dd className={cn("mt-1 text-2xl font-extrabold tabular-nums sm:text-[1.7rem]", s.tick && "rf-tick")} key={s.tick ? s.value : undefined}>
               {s.value}
             </dd>
-            <dd className="mt-0.5 truncate text-xs text-muted-foreground">{s.hint}</dd>
+            {s.hint ? <dd className="mt-0.5 truncate text-xs text-muted-foreground">{s.hint}</dd> : null}
           </div>
         ))}
       </dl>

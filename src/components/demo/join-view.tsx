@@ -1,6 +1,6 @@
 "use client"
 
-import { ArrowLeftIcon, ArrowRightIcon, CheckIcon, CircleAlertIcon, PartyPopperIcon, XCircleIcon } from "lucide-react"
+import { ArrowRightIcon, CheckIcon, CircleAlertIcon, PartyPopperIcon, XCircleIcon } from "lucide-react"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import { useEffect, useMemo, useRef, useState } from "react"
@@ -39,7 +39,7 @@ function freshFriend(used: string[]): Candidate {
 /** Flow 3: what an invitee sees when they open an ambassador's link, and what the contract does when they accept. */
 export function JoinView({ code }: { code: string }) {
   const demo = useDemo()
-  const { app, join, locale, disclaimer } = useAppCopy()
+  const { app, join, locale } = useAppCopy()
   const params = useSearchParams()
   const via = params?.get("via") ?? null
   const tx = useTx()
@@ -78,7 +78,6 @@ export function JoinView({ code }: { code: string }) {
       <section className="mx-auto flex max-w-lg flex-col items-center gap-4 py-12 text-center">
         <CircleAlertIcon className="size-10 text-warning" aria-hidden="true" />
         <h1 className="text-2xl font-extrabold tracking-display">{join.unknown.title}</h1>
-        <p className="text-muted-foreground">{join.unknown.body}</p>
         <Button asChild>
           <Link href={href(locale, "/app")}>{join.unknown.cta}</Link>
         </Button>
@@ -143,11 +142,6 @@ export function JoinView({ code }: { code: string }) {
 
   return (
     <div className="flex flex-col gap-6">
-      <Link href={href(locale, "/app")} className="inline-flex min-h-11 items-center gap-1.5 self-start text-sm font-bold text-primary-ink underline underline-offset-4">
-        <ArrowLeftIcon className="size-4" aria-hidden="true" />
-        {join.back}
-      </Link>
-
       <div className="grid gap-6 lg:grid-cols-[7fr_5fr] lg:items-start">
         {/* The invitation */}
         <section aria-labelledby="join-title" className="rounded-3xl border bg-card p-6 sm:p-8">
@@ -216,7 +210,6 @@ export function JoinView({ code }: { code: string }) {
                   {join.result.again}
                 </Button>
               ) : null}
-              <p className="text-xs text-muted-foreground">{disclaimer}</p>
             </div>
           )}
         </section>
@@ -226,7 +219,6 @@ export function JoinView({ code }: { code: string }) {
           <h2 id="persona-title" className="text-lg font-bold">
             {join.personas.title}
           </h2>
-          <p className="mt-1 text-sm text-muted-foreground">{join.personas.body}</p>
           <div role="radiogroup" aria-label={join.personas.label} className="mt-4 flex flex-col gap-2">
             {PERSONAS.map((id) => {
               const p = join.personas[id]

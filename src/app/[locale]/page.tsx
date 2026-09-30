@@ -6,11 +6,8 @@ import {
   CircleCheckIcon,
   CircleAlertIcon,
   FileSignatureIcon,
-  HandshakeIcon,
   QrCodeIcon,
-  ScaleIcon,
   ShieldCheckIcon,
-  SparklesIcon,
 } from "lucide-react"
 import type { Metadata } from "next"
 import Image from "next/image"
@@ -34,7 +31,6 @@ export async function generateMetadata({ params }: PageProps<"/[locale]">): Prom
   return pageMetadata(locale, "/", null, d.meta.description)
 }
 
-const WHY_ICONS = [SparklesIcon, HandshakeIcon, ScaleIcon]
 const STEP_ICONS = [QrCodeIcon, FileSignatureIcon, CalendarCheckIcon, AwardIcon]
 
 export default async function Home({ params }: PageProps<"/[locale]">) {
@@ -59,8 +55,7 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
         />
         <div className="relative mx-auto grid max-w-6xl gap-10 px-4 pt-12 pb-14 sm:px-6 lg:grid-cols-[5fr_7fr] lg:items-center lg:gap-12 lg:pt-20 lg:pb-20">
           <div>
-            <p className="eyebrow text-primary-ink">{d.eyebrow}</p>
-            <h1 id="hero-title" className="mt-4 text-[2.25rem] leading-[1.05] font-extrabold tracking-display sm:text-5xl lg:text-[3.5rem]">
+            <h1 id="hero-title" className="text-[2.25rem] leading-[1.05] font-extrabold tracking-display sm:text-5xl lg:text-[3.5rem]">
               {d.title}
             </h1>
             <p className="mt-5 max-w-xl text-lg text-muted-foreground sm:text-xl">{d.lead}</p>
@@ -75,9 +70,6 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
                 <Link href={href(locale, "/how-it-works")}>{d.secondary}</Link>
               </Button>
             </div>
-            <p className="mt-6 inline-flex items-center gap-2 rounded-full border border-dashed px-3 py-1 text-xs font-semibold text-muted-foreground">
-              {dict.common.demoBadge}
-            </p>
           </div>
           <HeroNetwork
             locale={locale}
@@ -97,28 +89,6 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
       </section>
 
       <SectionDivider />
-
-      {/* Why */}
-      <section aria-labelledby="why-title" className="mx-auto w-full max-w-6xl px-4 py-14 sm:px-6 lg:py-20">
-        <div className="max-w-2xl">
-          <h2 id="why-title" className="text-3xl font-bold tracking-display sm:text-[2rem]">
-            {d.why.title}
-          </h2>
-          <p className="mt-4 text-lg text-muted-foreground">{d.why.body}</p>
-        </div>
-        <ul className="mt-10 grid gap-4 md:grid-cols-3">
-          {d.why.items.map((item, i) => {
-            const Icon = WHY_ICONS[i] ?? SparklesIcon
-            return (
-              <li key={item.title} className="rounded-2xl border bg-card p-6">
-                <Icon className="size-6 text-primary" strokeWidth={1.75} aria-hidden="true" />
-                <h3 className="mt-4 text-xl font-bold">{item.title}</h3>
-                <p className="mt-2 text-muted-foreground">{item.body}</p>
-              </li>
-            )
-          })}
-        </ul>
-      </section>
 
       {/* Steps */}
       <section aria-labelledby="steps-title" className="border-y bg-secondary/40">
@@ -161,7 +131,6 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
           <h2 id="guard-title" className="text-3xl font-bold tracking-display sm:text-[2rem]">
             {d.guard.title}
           </h2>
-          <p className="mt-4 text-lg text-muted-foreground">{d.guard.body}</p>
           <ul className="mt-8 flex flex-col gap-3">
             {d.guard.rules.map((rule) => (
               <li key={rule} className="flex items-start gap-3 font-semibold">
@@ -238,8 +207,6 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
         </ul>
       </section>
 
-      <SectionDivider />
-
       {/* FAQ */}
       <section aria-labelledby="faq-title" className="mx-auto w-full max-w-3xl px-4 py-14 sm:px-6 lg:py-20">
         <h2 id="faq-title" className="text-3xl font-bold tracking-display sm:text-[2rem]">
@@ -258,12 +225,9 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
       {/* Closing */}
       <section aria-labelledby="closing-title" className="mx-auto w-full max-w-6xl px-4 pb-16 sm:px-6 lg:pb-24">
         <div className="flex flex-col items-start gap-6 rounded-3xl border bg-secondary p-8 sm:p-10 md:flex-row md:items-center md:justify-between">
-          <div className="max-w-xl">
-            <h2 id="closing-title" className="text-3xl font-bold tracking-display">
-              {d.closing.title}
-            </h2>
-            <p className="mt-3 text-lg text-muted-foreground">{d.closing.body}</p>
-          </div>
+          <h2 id="closing-title" className="max-w-xl text-3xl font-bold tracking-display">
+            {d.closing.title}
+          </h2>
           <Button asChild size="lg" className="w-full sm:w-auto">
             <Link href={href(locale, "/app")}>
               {d.closing.cta}

@@ -1,42 +1,40 @@
 "use client"
 
-import { CheckIcon, LayoutDashboardIcon, Loader2Icon, Share2Icon, TrophyIcon, WalletIcon, XCircleIcon } from "lucide-react"
+import { LayoutDashboardIcon, Loader2Icon, Share2Icon, TrophyIcon, WalletIcon, XCircleIcon } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import type { ReactNode } from "react"
 
 import { Button } from "@/components/ui/button"
-import { NetworkBadge } from "@/components/ui/network-badge"
 import { href } from "@/i18n/config"
-import { NETWORK_NAME } from "@/lib/demo/program"
 import { useDemo, useStorageOk } from "@/lib/demo/store"
 import { connectWallet } from "@/lib/demo/wallet"
 import { cn } from "@/lib/utils"
 
 import { useAppCopy } from "./app-provider"
 import { DemoControls } from "./demo-controls"
-import { Disclaimer } from "./disclaimer"
 
-/** App chrome under the site header: network, disclaimer, demo controls, section tabs; gates on wallet connection. */
+/**
+ * App chrome under the site header: ONE compact bar with the section nav on
+ * the left and the network + demo controls pill on the right. No testnet
+ * strip: that line lives in the wallet prompt, once per transaction.
+ * Gates on wallet connection.
+ */
 export function AppFrame({ children }: { children: ReactNode }) {
   const demo = useDemo()
   const storageOk = useStorageOk()
-  const { app, disclaimer } = useAppCopy()
+  const { app } = useAppCopy()
   const connected = demo?.wallet.status === "connected"
 
   return (
     <div className="flex flex-1 flex-col">
       <div className="border-b bg-secondary/40">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-4 gap-y-2 px-4 py-2.5 sm:px-6">
-          <NetworkBadge name={NETWORK_NAME} variant="outline" icon={<span className="block size-full rounded-full bg-success" />} />
-          <Disclaimer text={disclaimer} className="order-last min-w-0 basis-full sm:order-none sm:basis-auto sm:flex-1" />
-          <div className="ml-auto sm:ml-0">
-            <DemoControls />
-          </div>
+        <div className="mx-auto flex min-h-13 max-w-6xl items-center gap-2 px-4 sm:px-6">
+          {connected ? <AppSections /> : <span className="flex-1" />}
+          <DemoControls />
         </div>
       </div>
-      {connected ? <AppSections /> : null}
       {!storageOk ? (
         <p role="alert" className="mx-auto mt-4 w-full max-w-6xl px-4 text-sm text-warning sm:px-6">
           {app.storageError}
@@ -58,22 +56,22 @@ function AppSections() {
     { href: href(locale, "/app/leaderboard"), label: app.sections.leaderboard, icon: TrophyIcon, exact: false },
   ]
   return (
-    <nav aria-label={app.sections.label} className="border-b">
-      <ul className="mx-auto flex max-w-6xl gap-1 overflow-x-auto px-4 py-2 sm:px-6">
+    <nav aria-label={app.sections.label} className="min-w-0 flex-1">
+      <ul className="-mx-1 flex min-w-0 items-center gap-0.5 overflow-x-auto px-1 py-2 [scrollbar-width:none] sm:gap-1">
         {items.map((item) => {
           const active = item.exact ? pathname === item.href : pathname.startsWith(item.href)
           const Icon = item.icon
           return (
-            <li key={item.href}>
+            <li key={item.href} className="shrink-0">
               <Link
                 href={item.href}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "inline-flex h-10 items-center gap-2 rounded-full px-4 text-sm font-bold whitespace-nowrap transition-colors duration-150",
-                  active ? "bg-secondary text-foreground" : "text-muted-foreground hover:text-foreground"
+                  "inline-flex h-9 items-center gap-2 rounded-full px-2.5 text-sm font-semibold whitespace-nowrap transition-colors duration-150 sm:px-3.5",
+                  active ? "bg-card text-foreground ring-1 ring-border" : "text-muted-foreground hover:text-foreground"
                 )}
               >
-                <Icon className="size-4" aria-hidden="true" />
+                <Icon className="hidden size-4 sm:block" aria-hidden="true" />
                 {item.label}
               </Link>
             </li>
@@ -116,14 +114,6 @@ function ConnectGate() {
         {g.title}
       </h1>
       <p className="mt-3 text-muted-foreground">{g.body}</p>
-      <ul className="mt-6 flex flex-col gap-2 text-left text-sm">
-        {g.features.map((f) => (
-          <li key={f} className="flex items-center gap-2">
-            <CheckIcon className="size-4 text-success" aria-hidden="true" />
-            {f}
-          </li>
-        ))}
-      </ul>
       <Button
         size="lg"
         className="mt-8 w-full sm:w-auto"

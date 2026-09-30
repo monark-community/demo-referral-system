@@ -1,8 +1,6 @@
 "use client"
 
-import { CheckIcon } from "lucide-react"
 import Image from "next/image"
-import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import { useTx } from "@/lib/demo/chain"
@@ -18,10 +16,8 @@ export function RegisterCard() {
   const r = app.register
 
   const register = () =>
-    void tx.run({ title: app.summaries.register, rows: [{ label: app.summaries.registerRow, value: app.program }] }, (hash) => {
-      applyRegister(hash)
-      toast.success(r.done)
-    })
+    // No toast: the dashboard replacing this card is the confirmation.
+    void tx.run({ title: app.summaries.register, rows: [{ label: app.summaries.registerRow, value: app.program }] }, (hash) => applyRegister(hash))
 
   return (
     <section aria-labelledby="register-title" className="mx-auto w-full max-w-xl rounded-3xl border bg-card p-6 sm:p-8">
@@ -31,14 +27,6 @@ export function RegisterCard() {
         {r.title}
       </h1>
       <p className="mt-3 text-muted-foreground">{r.body}</p>
-      <ul className="mt-5 flex flex-col gap-2 text-sm">
-        {r.points.map((p) => (
-          <li key={p} className="flex items-center gap-2">
-            <CheckIcon className="size-4 text-success" aria-hidden="true" />
-            {p}
-          </li>
-        ))}
-      </ul>
       <Button size="lg" className="mt-7 w-full sm:w-auto" onClick={register} disabled={tx.busy}>
         {r.button}
       </Button>
