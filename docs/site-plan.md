@@ -2,12 +2,20 @@
 
 Status: shipped on `develop`. This plan describes what the site does, and it is kept in sync with the code.
 
-- Product: **Reffinity**, Monark's referral module, built for ambassador programs.
+- Product: **Reffinity**, Monark's Network Trust and reward module: trusted referrals for ambassador programs, and trust-gated missions any app can publish.
 - Authoritative description: https://www.monark.io/en/project/referral-system (including its milestones A to G).
 - Branding: **Monark-branded** (`true`). `lovable-migration/monark-brand-guidelines.md` is binding.
 - Stack: Next.js 16 (App Router, `src/`, TypeScript strict), pnpm, Tailwind CSS v4, shadcn/ui on the Monark UI registry, `lucide-react`, plus `uqr` for QR codes (see §9).
 
 Decisions made while working unattended are marked **Decision:**.
+
+> **Rebalance (2026-10-01).** Owner feedback: Reffinity combines two things, **Network Trust** (inviting real people so the system can judge connections and the odds a wallet is human, and stop sybil-style gaming) and a **reward layer other apps can use** (missions users complete for rewards). The first version was almost all referral and trust. The two now carry equal weight: trust is what makes the rewards cheat-resistant, and builders get a clear integration path (reward types, verification, API).
+>
+> What changed: the hero and home page (two equal layers, a missions section), a new `/developers` page, `/how-it-works` reordered (trust before rewards, network signals added, contract events moved to `/developers`), and a new `/app/missions` in the demo (your own network trust score, trust-gated missions, and "Create a mission" with an escrow and a trust gate).
+>
+> The student prototype (`monark-community/referral-system`) implements the referral tree, an 80/20 two-level points split and milestone tiers. It has no missions, no partner API and no trust score, so that layer is designed here. The API is presented as an **integration preview** that the demo simulates.
+>
+> Section 1 (product brief) and section 10 (pricing) still describe the referral side as first shipped; everything else below is updated. The text budgets measured in `docs/simplification.md` predate this change.
 
 ---
 
@@ -47,21 +55,23 @@ Secondary users are the **invitees** (they want a clear, trustworthy invitation 
 
 ## 2. Value proposition
 
-**Reffinity gives Monark ambassadors a wallet-bound invite link that pays out only when the people they bring actually take part, with every referral recorded on-chain, so rewards are fair, visible to everyone and hard to game.**
+**Reffinity pairs a trust network that tells real people from farmed wallets with a reward layer any app can plug into, so communities and app builders pay for real participation without paying cheaters.**
 
 Supporting benefits, as outcomes:
 
-1. **You get credit for the people who show up**, automatically, when they attend their first workshop or finish their first bounty, not when someone remembers to update a spreadsheet.
-2. **Nobody can argue about who brought whom.** The referral record is written once, publicly, and can't be reassigned.
-3. **Farmed sign-ups don't win.** Self-referrals and loops are rejected by the contract, and suspicious clusters are held for review, so the leaderboard reflects real growth.
+1. **Know who's real.** Every invite links two people on-chain. Each wallet's trust score comes from its own history and its connections, so farmed clusters are held and never paid.
+2. **Pay for real work, from any app.** Publish a mission (task, reward, verification, minimum trust). Reffinity pays verified people from an escrowed budget and refuses the rest.
+3. **Nobody can argue about who brought whom.** The referral record is written once, publicly. Ambassadors get credit automatically, plus an optional inviter share of mission rewards.
+
+Audiences: ambassadors and community organizers (Network Trust, referral milestones) and **app and dApp builders** (missions, reward types, API). Both are first-class.
 
 ## 3. Hero
 
-- **Headline** (7 words): *Reward the invites that actually show up.*
-- **Subheadline:** *Referrals recorded on-chain, rewarded when invitees reach real milestones.* No eyebrow (simplification pass, see `docs/simplification.md`).
+- **Headline** (6 words): *Rewards only real people can earn.*
+- **Subheadline:** *A trust network that spots farmed wallets, and missions any app can reward.* No eyebrow.
 - **Primary CTA:** "Launch the demo" → `/{locale}/app`.
-- **Secondary CTA:** "How rewards are earned" → `/{locale}/how-it-works`.
-- **Hero visual:** product UI built in code, the **live referral network**: your wallet at the centre, invitees around it as nodes on flat orange lines, in a card framed like the dashboard. On a loop it plays one referral's life: a new edge draws in ("Léa joined"), a milestone lights the node, and a small reward dot travels back along the edge to your points counter. A side ticker lists the matching contract events. **Why:** the product's whole point is that rewards follow real outcomes; showing that motion is clearer than any photo, and the line-and-node drawing echoes the Monark mesh butterfly.
+- **Secondary CTA:** "Build with Reffinity" → `/{locale}/developers`.
+- **Hero visual:** product UI built in code, the **live referral network**: your wallet at the centre, invitees around it as nodes on flat orange lines, in a card framed like the dashboard. On a loop it plays one referral's life: a new edge draws in ("Léa joined"), a milestone lights the node, and a small reward dot travels back along the edge to your points counter. A side ticker ("Live events") lists them, including one reward-layer event: Léa finishes a Fluidswap mission and Amara receives an inviter share. **Why:** the product's whole point is that rewards follow real outcomes; showing that motion is clearer than any photo, and the line-and-node drawing echoes the Monark mesh butterfly.
 
 ## 4. Page map
 
@@ -69,9 +79,11 @@ All routes live under `/{locale}` (`en`, `fr`); `/` redirects to the visitor's p
 
 | Route | Purpose | Sections, in order |
 |-|-|-|
-| `/` | Explain the product in one scroll and send people to the demo | Hero (network visual) · "From link to reward" (four steps, line art) · "Built to be hard to game" (four rule lines and a small live replica of the checks) · "Made for community builders" (ambassadors, student clubs, program organizers, with photos) · FAQ (4 questions) · closing CTA band (heading + button) |
-| `/how-it-works` | For students, developers and organizers who want the mechanics | One-line intro · the referral record (diagram) · milestones and rewards (table of the Fall 2026 program) · the trust score (signals with their weights, one-line example) · what lives on-chain vs off-chain · contract events for developers (code behind a "Show the contract events" disclosure) · CTA (heading + button) |
-| `/app` | The working product: the ambassador dashboard | Wallet gate → stats (points, rank, verified invites, claimable tUSDC) · network graph · invites list (5 at a time + "Show all invites") with status filters and an invite detail sheet · rewards panel with claim · activity log (4 at a time) |
+| `/` | Explain the product in one scroll and send people to the demo | Hero (network visual) · "Two layers, one system" (Network Trust and Rewards as two equal photo cards, each linking to its page) · "Built to be hard to game" (four rule lines and a small live replica of the checks) · "Missions any app can publish" (four reward types, an SDK snippet, "Read the developer guide") · FAQ (4 questions covering both layers) · closing CTA band |
+| `/how-it-works` | For students, organizers and anyone who wants the rules | One-line intro · 1. the referral record (diagram) · 2. the trust score (signals from the wallet and from its connections, one-line example) · 3. milestones and missions (Fall 2026 table + link to `/developers`) · 4. on-chain vs off-chain · CTA |
+| `/developers` | For app and dApp builders: how to integrate the reward layer | Title, one line and an "Integration preview" pill · three steps (publish and fund, report completions, Reffinity pays) next to code tabs (TypeScript SDK, REST, Solidity events) · reward types (tokens, points, badges, inviter share) · three ways to verify · trust API and webhooks (code) · CTA "Open missions" |
+| `/app/missions` | The reward layer, working | Title + "Create a mission" · missions from Monark apps (TaskFlow, GovChain, Fluidswap, TrustRate, Monark) with reward, verification and trust chips, a spots bar, and a state (open, in progress, completed, locked, full, yours) · your trust score card (gauge, network signals, "Invite someone real") · rewards card (claim, badges) |
+| `/app` | The working product: the ambassador dashboard | Wallet gate → stats (points with rank, your trust score with the missions open to you, verified invites, claimable tUSDC) · network graph · invites list (5 at a time + "Show all invites") with status filters and an invite detail sheet · rewards panel with claim · activity log (4 at a time) |
 | `/app/invite` | Share your link | Your link + copy · QR code (download SVG) · tracked channel links (create, opens, joins) · ready-to-send messages (one shown at a time, picked by label) · "Preview as a friend" entry into `/r/...` |
 | `/app/leaderboard` | Program ranking | "Verified outcomes / Raw clicks" toggle (the ranking rule is in an info popover next to the title) · ranked table with your row highlighted · a one-line warning only in the raw-clicks view |
 | `/r/[code]` | What an invitee sees when they open a link | One compact bar (back to the dashboard, network + demo controls pill) · invitation card (who invited you, which program, three steps) · demo persona picker ("Who is opening this link?") · accept → wallet prompt → pending → joined, held or rejected |
@@ -79,12 +91,14 @@ All routes live under `/{locale}` (`en`, `fr`); `/` redirects to the visitor's p
 | `/pricing` | **Internal strategy review only.** Never linked, excluded from the sitemap, `noindex, nofollow` | See §10 |
 | 404 | Localized not-found page | Vertical Monark logo · message · home and demo buttons |
 
-**Why the extra pages:** `/how-it-works` exists because the project is explicitly a teaching build (abuse cases, incentive design), and organizers need to see the rules before trusting the leaderboard; it would overload the home page. `/r/[code]` is the other half of the product: a referral system has two sides, and letting visitors open their own link and play the invitee is the only honest way to demo the on-chain record and the abuse rules. `/credits` holds photo credits.
+**Why `/developers` and `/app/missions`:** the reward layer has its own audience (builders) and needs its own proof. Without them, the site only told the trust half of the story.
 
-**Header** (standard Monark navbar, guidelines §10 as updated on 2026-09-29): butterfly + "Reffinity" on one line (no "by Monark"; aria-label "Reffinity, by Monark: home") · Overview · How it works · Demo, left-aligned after the brand · on the right: Demo chip · EN/FR · theme toggle · "Launch demo" (becomes `connect-wallet` inside the app). Below `lg`: brand + menu button; the sheet holds links, Demo chip, EN/FR, theme and the action.
-**Footer:** standard three bands (product line + Overview, How it works, Demo, Credits · "Reffinity is built by Monark", Monark logo, tagline, project page, GitHub, socials · © line, "Demo · simulated data", photo credits link). No testnet line in the footer.
+**Why the other extra pages:** `/how-it-works` exists because the project is explicitly a teaching build (abuse cases, incentive design), and organizers need to see the rules before trusting the leaderboard; it would overload the home page. `/r/[code]` is the other half of the product: a referral system has two sides, and letting visitors open their own link and play the invitee is the only honest way to demo the on-chain record and the abuse rules. `/credits` holds photo credits.
+
+**Header** (standard Monark navbar, guidelines §10 as updated on 2026-09-29): butterfly + "Reffinity" on one line (no "by Monark"; aria-label "Reffinity, by Monark: home") · Overview · How it works · Developers · Demo, left-aligned after the brand · on the right: Demo chip · EN/FR · theme toggle · "Launch demo" (becomes `connect-wallet` inside the app). Below `lg`: brand + menu button; the sheet holds links, Demo chip, EN/FR, theme and the action.
+**Footer:** standard three bands (product line + Overview, How it works, Developers, Demo, Credits · "Reffinity is built by Monark", Monark logo, tagline, project page, GitHub, socials · © line, "Demo · simulated data", photo credits link). No testnet line in the footer.
 **Demo chip:** `primary` tint at 8% in light mode, 15% in dark (15% in light mode fails AA).
-**App bar** (inside `/app`, and on `/r/[code]`): ONE compact bar under the header, with the section nav (Dashboard · Invite · Leaderboard; on `/r/[code]` a "Back to your dashboard" link) on the left and one pill on the right that shows the network ("● Sepolia testnet") and opens the demo controls (icon-only on phones). No testnet strip.
+**App bar** (inside `/app`, and on `/r/[code]`): ONE compact bar under the header, with the section nav (Dashboard · Missions · Invite · Leaderboard; on `/r/[code]` a "Back to your dashboard" link) on the left and one pill on the right that shows the network ("● Sepolia testnet") and opens the demo controls (icon-only on phones). No testnet strip.
 **Testnet notice:** "Testnet demo · not financial advice · no real funds" appears only in the wallet prompt, once per transaction (brand guidelines §11).
 
 ## 5. Feature highlights
@@ -97,6 +111,9 @@ All routes live under `/{locale}` (`en`, `fr`); `/` redirects to the visitor's p
 | Hard rules and trust score | Farmed sign-ups can't win; organizers can trust the ranking | Home "hard to game", `/how-it-works`, invite sheet, `/r/[code]` personas | Flow 3 (rejected and held outcomes) |
 | Points, claimable rewards and history | See what you've earned and what's pending, claim it yourself | Dashboard stats and rewards panel | Flow 5 |
 | Verified leaderboard | Rankings reflect real growth, not clicks | `/app/leaderboard` | Leaderboard toggle |
+| Your own network trust score | Your connections vouch for you; inviting real people unlocks more | `/app/missions`, dashboard stat, `/how-it-works` | Flow 7 (flow 3 moves it) |
+| Trust-gated missions | Apps pay real people in tokens, points or badges, never farms | Home "Missions", `/developers`, `/app/missions` | Flows 7 and 8 |
+| Builder integration | A clear path (publish and fund, report, get paid out) with API, SDK, events and webhooks | `/developers`, create-mission sheet | Flow 8 |
 
 ## 6. Key flows
 
@@ -113,6 +130,13 @@ All transactions go through the simulated wallet prompt (confirm or reject), the
 4. **An invitee reaches a milestone.** Dashboard → open an invite (e.g. Sofia) → "Simulate: confirm workshop check-in" (standing in for the organizer's check-in) → prompt → pending → **confirmed**: the node lights up, a reward dot travels to you, +25 points ticks, the activity log gets the event. For a held invite the milestone is recorded but the reward shows "held". *Failed*: the milestone stays unconfirmed, with a retry.
 5. **Claim your rewards.** Rewards panel shows claimable tUSDC (e.g. 15.00 tUSDC) → "Claim 15.00 tUSDC" → prompt with the testnet disclaimer and fee → pending → **confirmed**: claimable drops to 0, the claim appears in the activity log (its hash in the time's tooltip). *Failed*: amount stays claimable, retry. *Empty*: "Nothing to claim yet."
 6. **Context on demand.** "Who confirms milestones?" (invite sheet) and "How the ranking works" (leaderboard) are info icons that open a popover (`src/components/ui/info-tip.tsx`, works on touch). Joining the program shows no toast: the dashboard replacing the join card is the confirmation.
+7. **Complete a mission (participant).** `/app/missions` → GovChain "Vote on a community proposal" is in progress → "Simulate: GovChain reports it done" (the app signs the report) → prompt → pending → **confirmed**: "Completed. Badge · First vote is yours." The badge appears in the rewards card; token missions add to the claimable balance, points missions to your points. "Start in Fluidswap" opens a mission first.
+   - *Locked*: "Host a campus workshop" needs trust 85 ("Needs trust 85. Yours is 80." + "Invite someone real").
+   - *Failed*: rejected or reverted, with a retry. If your score dropped below the minimum after you started, the gate reverts: "Your trust score is below this mission's minimum. Nothing was paid."
+8. **Publish a mission (builder).** "Create a mission" opens a sheet with: app, mission, verification (on-chain event / app API / organizer check-in), reward (tUSDC / points / badge) and amount, spots, minimum trust (none, 50, 70, 85), the escrow budget against your wallet balance, and "The API call this makes" (a disclosure).
+   - "Lock 100.00 tUSDC and publish" → prompt → pending → **confirmed**: the sheet closes, "… is live." appears, and the new "Yours" card is first.
+   - Validation: app and task required, 60 characters max, amount 1–1,000, spots 1–10,000, budget no more than your balance.
+   - Then "Simulate a completion by": **Léa (trust 91)** is paid from escrow; **a farmed wallet (trust 18)** gets "Refused: trust 18 is below 50. Nothing paid." With no minimum, the farmed wallet does get paid, which shows why the minimum matters.
 
 ## 7. Content (EN / FR)
 
@@ -125,24 +149,25 @@ The shipped copy lives in `src/i18n/dictionaries/{en,fr}.ts`; this is the source
 | Header brand | Reffinity (aria-label "Reffinity, by Monark: home") | Reffinity (« Reffinity, par Monark : accueil ») |
 | Footer credit | Reffinity is built by Monark | Reffinity est conçu par Monark |
 | Demo chip | Demo | Démo |
-| Nav | Overview · How it works · Demo | Aperçu · Fonctionnement · Démo |
+| Nav | Overview · How it works · Developers · Demo | Aperçu · Fonctionnement · Développeurs · Démo |
 | Header action | Launch demo | Lancer la démo |
 | Demo badge | Demo · simulated data | Démo · données simulées |
 | Value disclaimer (wallet prompt only) | Testnet demo · not financial advice · no real funds | Démo sur testnet · pas un conseil financier · aucun fonds réel |
-| Footer line | Referral links that reward people who actually take part. | Des liens de parrainage qui récompensent la vraie participation. |
+| Footer line | Trust-checked rewards that only real people can earn. | Des récompenses vérifiées, pour de vraies personnes seulement. |
 | Tagline | Fostering Collaboration within the Web3 Community | Favoriser la collaboration au sein de la communauté Web3 |
 
 ### Home and How it works
 
 The shipped copy is in `src/i18n/dictionaries/{en,fr}.ts`. After the simplification pass (`docs/simplification.md`) it follows the brand guidelines' text budgets:
 
-- **Hero:** no eyebrow; H1 "Reward the invites that actually show up." / « Récompensez les invitations qui se concrétisent. »; one 10-word line; two buttons; hero card caption "Live example" / « Exemple en direct ».
-- **From link to reward** / « Du lien à la récompense. »: four steps of 6 to 9 words; "Read the full rules" link.
+- **Hero:** no eyebrow; H1 "Rewards only real people can earn." / « Des récompenses réservées aux vraies personnes. »; one line; two buttons; hero card caption "Live example" / « Exemple en direct ».
+- **Two layers, one system** / « Deux couches, un seul système. »: "Know who's real." (Network Trust) and "Pay for real work." (Rewards), each with one line, three points and a link.
 - **Built to be hard to game** / « Conçu pour ne pas être contourné. »: four short rule lines ("No self-referrals", "One referrer per wallet, forever", "No referral loops", "Bursts of linked wallets are held") next to the three-case replica.
-- **Made for community builders** / « Pour celles et ceux qui bâtissent une communauté. »: three photo cards of 8 to 10 words.
-- **FAQ** (the site's only FAQ; 4 questions, answers of 9 to 16 words): do invitees need a wallet? · what counts as a milestone? · can I change who referred me? · is any of this real money? The former "What happens when a referral is held?" is answered by the trust-score section of `/how-it-works`.
-- **Closing:** "Try it with your own link." / « Essayez avec votre propre lien. » + "Launch the demo".
-- **How it works:** "How Reffinity turns a referral into a reward" · "1. The referral record" · "2. Milestones and rewards" · "3. The trust score" · "4. What's on-chain, and what isn't" · "5. For developers: contract events" (code behind "Show the contract events") · CTA "Try the rules in the demo". At most one line under each heading.
+- **Missions any app can publish** / « Des missions que toute app peut publier. »: one line, four reward types of 4 to 6 words, an SDK snippet, "Read the developer guide".
+- **FAQ** (the site's only FAQ; 4 questions): how is the trust score computed? · how does my app plug in? · do invitees need a wallet? · is any of this real money?
+- **Closing:** "Try both sides in the demo." / « Essayez les deux côtés dans la démo. » + "Launch the demo".
+- **How it works:** "How Reffinity knows who's real, and pays them" · "1. The referral record" · "2. The trust score" (from the wallet / from its connections) · "3. Milestones and missions" · "4. What's on-chain, and what isn't" · CTA. The contract events moved to `/developers`.
+- **Developers:** "Reward real people from your app." · "Three steps to go live." · "Reward types." · "Three ways to verify." · "Trust as an API." · "Webhooks." · CTA "Publish a mission in the demo." The code samples live in `src/lib/snippets.ts`.
 
 ### App: empty and error states
 
@@ -164,9 +189,9 @@ Colour, type, logo, header and footer follow the guidelines exactly: §3 token b
 
 - **Layouts and rhythm.** Home alternates a wide product band (hero network) with narrow text sections, capped at `max-w-6xl`, `py-20` desktop / `py-14` mobile. The hero is split 5/7 (copy left, product card right) on desktop and stacks on mobile with the card under the CTAs. One section divider (monark.io's orange line with end circles), after the hero. The app uses a denser rhythm: a stat row, then a 7/5 grid (network + invites / rewards + activity), stacking on mobile.
 - **Hero visual.** The live referral network (see §3), drawn in SVG with flat orange 2px lines and outlined nodes.
-- **Illustrations.** No stock illustrations. New line-art diagrams in code: the four-step "link to reward" strip, the referral-record diagram (two wallets, one arrow, one contract entry) and the trust-score gauge (a half-circle arc, orange fill up to the score). Monark's decorative `network.svg` idea is echoed by the network graph rather than copied.
+- **Illustrations.** No stock illustrations. New line-art diagrams in code: the three-step integration strip on `/developers`, dark code blocks, the referral-record diagram (two wallets, one arrow, one contract entry) and the trust-score gauge (a half-circle arc, orange fill up to the score). Monark's decorative `network.svg` idea is echoed by the network graph rather than copied.
 - **Mesh butterfly.** Used **once**, on the home hero: large, partly cropped off the top-left, at low opacity behind the copy column, flat strokes only. No gradients anywhere (the logo keeps its own).
-- **Photography direction.** Warm, candid, human-scale moments of people bringing people in: two friends looking at a phone on campus (the invitation), a lively student workshop (the first milestone), a meetup talk (the organizer's side). Used only in "Who uses it" and credited on `/credits`.
+- **Photography direction.** Warm, candid, human-scale moments of people bringing people in: two friends looking at a phone on campus (a real connection: Network Trust) and a lively student workshop (real work being done: Rewards). Used only in the home "Two layers" cards and credited on `/credits`. **Decision:** the meetup photo was dropped with the audiences section, so the home page stays at five sections.
 - **Signature moments.**
   1. **A referral travels the network.** When an invite is recorded, its edge draws from your node in 250 ms; when a milestone confirms, a small orange dot travels back along the edge and the points counter ticks up.
   2. **The abuse catch.** On `/r/[code]`, choosing a suspicious persona ends in a plain-language revert or in the trust-score gauge settling in the "held" zone, never in a generic error.
@@ -202,7 +227,8 @@ A designed `/pricing` page exists for internal review only: two columns ("Commun
 ## 11. Out of scope
 
 - No real chain, wallet, signatures, backend or email. Everything is simulated in `src/lib/demo/` and persisted in `localStorage`.
-- No organizer console: programs, milestones and rewards are fixed to the Fall 2026 example and shown read-only. Reviewing held referrals is described, not simulated.
+- No organizer console for the referral program: its milestones and rewards are fixed to the Fall 2026 example. Reviewing held referrals is described, not simulated. Missions *can* be created in the demo; editing, pausing and refunding unused escrow are described (`EscrowReturned`), not simulated.
+- No real API, SDK or webhooks: `/developers` is an integration preview, and its fields match what the demo simulates.
 - No multi-level (pyramid) rewards: only the direct inviter is rewarded, deliberately.
 - No embedded-wallet onboarding for invitees (the FAQ describes it); personas stand in for new wallets.
 - No real analytics or tracking: open counts on tracked links are simulated.

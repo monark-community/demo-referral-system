@@ -1,8 +1,11 @@
 # Reffinity by Monark
 
-**Reward the invites that actually show up.**
+**Rewards only real people can earn.**
 
-Reffinity is Monark's referral module for ambassador programs. Each ambassador gets a link (and QR code) tied to their wallet. When someone accepts it, the referral contract records who invited whom, once and publicly. The ambassador is then rewarded as the invitee takes part (a first workshop, a first bounty, 30 days of activity), not for clicks. Self-referrals and referral loops are rejected by the contract, and suspicious sign-up bursts are held for review by a trust score, so the leaderboard reflects real growth.
+Reffinity has two layers of equal weight:
+
+- **Network Trust.** Invites are wallet-bound links. When someone accepts, the referral contract records who invited whom, once and publicly; self-referrals and loops are rejected. Every wallet gets a trust score (0–100) from its own history *and its connections*: who vouched for it, and how the people it invited turned out. Farmed clusters land below 50 and are held, never paid. This is what makes the second layer cheat-resistant (sybil attacks, farmed sign-ups).
+- **Rewards.** Any app publishes **missions**: a task, a reward (tokens from an escrowed budget, points, badges, or an inviter share), a verification method (on-chain event, the app's API, or an organizer check-in) and a minimum trust score. Reffinity pays wallets above the minimum and refuses the rest. Referral milestones (first workshop, first bounty, 30 active days) are the first program built on it.
 
 This repository is the **interactive demo site**: a Next.js app with simulated wallet and chain, in English and French.
 
@@ -42,6 +45,10 @@ No environment variables are needed. `NEXT_PUBLIC_SITE_URL` optionally overrides
 4. **Confirm an invitee's milestone** from the dashboard (you sign as the organizer): the node lights up and a reward travels back to you.
 5. **Claim** your tUSDC rewards.
 6. Flip the **leaderboard** between verified outcomes and raw clicks to see why clicks don't count.
+7. On `/app/missions`, see **your own trust score** built from your connections (accept a friend on `/r/...` and it rises; accept a burst wallet and it drops), **complete a mission** (the app reports it, the trust gate pays a badge, points or tUSDC), and see one mission **locked** by your score.
+8. **Create a mission** as an app: name, task, verification, reward, spots and minimum trust, with the escrow budget and the API call it makes. Then simulate completions: a verified person is paid from escrow, a farmed wallet (trust 18) is refused.
+
+`/developers` is the integration guide: the three-step path (publish and fund, report completions, Reffinity pays), reward types, verification methods, the trust API, webhooks and contract events. It is an **integration preview**: the demo simulates every call.
 
 ## How the simulation works
 
@@ -49,14 +56,14 @@ Everything lives in `src/lib/demo/`, behind a small typed API, so it could be sw
 
 | File | Role |
 |-|-|
-| `types.ts` | Domain types: invites, milestones, trust signals, tracked links, activity, wallet, transactions |
-| `program.ts` | The Fall 2026 program: milestones, points, tUSDC rewards, trust threshold, leaderboard peers, personas |
+| `types.ts` | Domain types: invites, milestones, trust signals, tracked links, missions and rewards, activity, wallet, transactions |
+| `program.ts` | The Fall 2026 program (milestones, points, trust threshold, peers, personas), Network Trust weights, and the seeded missions from Monark apps |
 | `seed.ts` | Believable seeded data (dates relative to now, deterministic addresses and hashes) |
 | `store.ts` | External store persisted to `localStorage` (every access in try/catch), plus the wallet-prompt promise |
 | `wallet.ts` | Simulated connect / disconnect |
 | `chain.ts` | `useTx()`: wallet prompt → pending with a hash (1.2–2.4 s, 3–6 s on "slow network") → confirmed or reverted; contract checks run when the block is mined |
-| `ops.ts` | State changes on confirmation and the contract's hard rules (self-referral, loop, duplicate) |
-| `selectors.ts` | Derived values: trust score, status, points, claimable/held rewards, leaderboard |
+| `ops.ts` | State changes on confirmation and the contracts' hard rules (self-referral, loop, duplicate, mission trust gate, escrow) |
+| `selectors.ts` | Derived values: trust scores (invitees and your own network score), status, mission state, points, claimable/held rewards, badges, leaderboard |
 
 "Demo controls" in the app toggle a slow network, force the next transaction to fail, and reset the demo (back to the example, or from scratch).
 
@@ -64,15 +71,16 @@ Everything lives in `src/lib/demo/`, behind a small typed API, so it could be sw
 
 ```
 src/
-  app/[locale]/            pages (home, how-it-works, app, app/invite, app/leaderboard, r/[code], credits, pricing), 404, OG image
+  app/[locale]/            pages (home, how-it-works, developers, app, app/missions, app/invite, app/leaderboard, r/[code], credits, pricing), 404, OG image
   app/sitemap.ts, robots.ts, icon.svg
   proxy.ts                 redirects / to the preferred language
   components/site/         standard Monark header, footer, brand, Demo chip, EN/FR switch, theme toggle
-  components/demo/         the demo app (dashboard, invite sheet, rewards, activity, invite page, leaderboard, join page)
-  components/diagrams/     network graph, trust gauge, record diagram, QR code
+  components/demo/         the demo app (dashboard, missions, trust card, create-mission sheet, invite sheet, rewards, activity, invite page, leaderboard, join page)
+  components/diagrams/     network graph, trust gauge, record diagram, QR code, code block
   components/ui/           @monark/ui registry components (restyled as Monark pills)
   i18n/                    typed EN/FR dictionaries
   lib/demo/                simulated chain, wallet and data
+  lib/snippets.ts          integration code samples (home, /developers)
 docs/                      site plan, assets, screenshots
 scripts/screenshots.mjs    Playwright visual check
 ```

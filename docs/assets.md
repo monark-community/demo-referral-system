@@ -6,9 +6,10 @@ All photos are from Unsplash under the free [Unsplash License](https://unsplash.
 
 | File | Unsplash page | Photographer | Profile | Used on |
 |-|-|-|-|-|
-| `public/images/invite.jpg` | https://unsplash.com/photos/aKC5r4WoLxY | SanDisk | https://unsplash.com/@sandisk | Home, "Who uses it": ambassadors; `/credits` |
-| `public/images/workshop.jpg` | https://unsplash.com/photos/ovSMrhtQr_0 | Maxim Tolchinskiy | https://unsplash.com/@shaikhulud | Home, "Who uses it": student clubs; `/credits` |
-| `public/images/meetup.jpg` | https://unsplash.com/photos/1-aA2Fadydc | Quilia | https://unsplash.com/@heyquilia | Home, "Who uses it": program organizers; `/credits` |
+| `public/images/invite.jpg` | https://unsplash.com/photos/aKC5r4WoLxY | SanDisk | https://unsplash.com/@sandisk | Home, "Two layers": the Network Trust card; `/credits` |
+| `public/images/workshop.jpg` | https://unsplash.com/photos/ovSMrhtQr_0 | Maxim Tolchinskiy | https://unsplash.com/@shaikhulud | Home, "Two layers": the Rewards card; `/credits` |
+
+The meetup photo (Quilia) was removed with the "Made for community builders" section, when the home page was rebalanced between Network Trust and Rewards.
 
 ## Monark brand assets
 
@@ -24,10 +25,11 @@ From `lovable-migration/brand-refs/` and the [monark-community/website](https://
 
 ## Built in code
 
-- Referral network graph (home hero and dashboard): `src/components/diagrams/network-graph.tsx`, flat orange lines and nodes, milestone rings, edge-draw and reward-dot animations.
+- Referral and trust network graph (home hero and dashboard): `src/components/diagrams/network-graph.tsx`, flat orange lines and nodes, milestone rings, edge-draw and reward-dot animations.
 - Trust-score gauge: `src/components/diagrams/trust-gauge.tsx`.
 - Referral-record diagram (`/how-it-works`): `src/components/diagrams/record-diagram.tsx`.
-- Four-step "link to reward" strip (home): line and outlined icon circles in JSX.
+- Three-step integration strip (`/developers`): line and outlined number circles in JSX.
+- Code samples (home, `/developers`): `src/components/diagrams/code-block.tsx`, with the examples in `src/lib/snippets.ts`.
 - QR code: `src/components/diagrams/qr-code.tsx`, encoded with `uqr`, rendered as SVG, downloadable.
 - Open Graph image per locale: `src/app/[locale]/opengraph-image.tsx` (`next/og`).
 - Wallet identicons: `react-jazzicon` through the `@monark/ui` `wallet` component.
