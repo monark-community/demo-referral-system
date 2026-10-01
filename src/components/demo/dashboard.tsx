@@ -10,7 +10,7 @@ import { href } from "@/i18n/config"
 import { t } from "@/i18n/t"
 import { clearLastEvent } from "@/lib/demo/ops"
 import { PROGRAM } from "@/lib/demo/program"
-import { inviteStatus, reachedCount, totals, yourRank } from "@/lib/demo/selectors"
+import { inviteStatus, missionState, reachedCount, totals, yourRank, yourTrust } from "@/lib/demo/selectors"
 import { useDemo } from "@/lib/demo/store"
 import { formatDate, formatNumber, formatReward, initials } from "@/lib/format"
 import { cn } from "@/lib/utils"
@@ -66,9 +66,13 @@ export function Dashboard() {
       progress: reachedCount(i),
     }))
 
-  const stats: { label: string; value: string; hint?: string; tick?: boolean }[] = [
-    { label: app.stats.points, value: formatNumber(tot.points, locale), tick: true },
-    { label: app.stats.rank, value: t(app.stats.rankValue, { rank, total: PROGRAM.ambassadors }) },
+  const trust = yourTrust(demo)
+  const others = demo.missions.filter((m) => !m.yours)
+  const open = others.filter((m) => !["locked", "full"].includes(missionState(demo, m, trust.score))).length
+
+  const stats: { label: string; value: string; hint?: string; tick?: boolean; href?: string }[] = [
+    { label: app.stats.points, value: formatNumber(tot.points, locale), hint: t(app.stats.rankHint, { rank, total: PROGRAM.ambassadors }), tick: true },
+    { label: app.stats.trust, value: String(trust.score), hint: t(app.stats.trustHint, { open, total: others.length }), tick: true, href: href(locale, "/app/missions") },
     { label: app.stats.verified, value: formatNumber(tot.verified, locale), hint: t(app.stats.verifiedHint, { opened: tot.opened }) },
     { label: app.stats.claimable, value: formatReward(tot.claimable, locale) },
   ]
@@ -90,8 +94,16 @@ export function Dashboard() {
 
       <dl className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {stats.map((s) => (
-          <div key={s.label} className="rounded-2xl border bg-card p-4">
-            <dt className="text-sm text-muted-foreground">{s.label}</dt>
+          <div key={s.label} className="relative rounded-2xl border bg-card p-4 has-[a:focus-visible]:ring-2 has-[a:focus-visible]:ring-ring">
+            <dt className="text-sm text-muted-foreground">
+              {s.href ? (
+                <Link href={s.href} className="after:absolute after:inset-0 after:rounded-2xl hover:text-foreground focus-visible:outline-none">
+                  {s.label}
+                </Link>
+              ) : (
+                s.label
+              )}
+            </dt>
             <dd className={cn("mt-1 text-2xl font-extrabold tabular-nums sm:text-[1.7rem]", s.tick && "rf-tick")} key={s.tick ? s.value : undefined}>
               {s.value}
             </dd>

@@ -1,6 +1,6 @@
 "use client"
 
-import { LayoutDashboardIcon, Loader2Icon, Share2Icon, TrophyIcon, WalletIcon, XCircleIcon } from "lucide-react"
+import { GiftIcon, LayoutDashboardIcon, Loader2Icon, Share2Icon, TrophyIcon, WalletIcon, XCircleIcon } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -52,6 +52,7 @@ function AppSections() {
   const pathname = usePathname() ?? ""
   const items = [
     { href: href(locale, "/app"), label: app.sections.dashboard, icon: LayoutDashboardIcon, exact: true },
+    { href: href(locale, "/app/missions"), label: app.sections.missions, icon: GiftIcon, exact: false },
     { href: href(locale, "/app/invite"), label: app.sections.invite, icon: Share2Icon, exact: false },
     { href: href(locale, "/app/leaderboard"), label: app.sections.leaderboard, icon: TrophyIcon, exact: false },
   ]
@@ -63,16 +64,18 @@ function AppSections() {
           const Icon = item.icon
           return (
             <li key={item.href} className="shrink-0">
+              {/* On phones, four sections don't fit with labels: inactive ones show their icon only. */}
               <Link
                 href={item.href}
                 aria-current={active ? "page" : undefined}
+                title={item.label}
                 className={cn(
-                  "inline-flex h-9 items-center gap-2 rounded-full px-2.5 text-sm font-semibold whitespace-nowrap transition-colors duration-150 sm:px-3.5",
+                  "inline-flex h-9 min-w-9 items-center justify-center gap-2 rounded-full px-2.5 text-sm font-semibold whitespace-nowrap transition-colors duration-150 sm:px-3.5",
                   active ? "bg-card text-foreground ring-1 ring-border" : "text-muted-foreground hover:text-foreground"
                 )}
               >
-                <Icon className="hidden size-4 sm:block" aria-hidden="true" />
-                {item.label}
+                <Icon className="size-4 shrink-0" aria-hidden="true" />
+                <span className={cn(!active && "sr-only sm:not-sr-only")}>{item.label}</span>
               </Link>
             </li>
           )

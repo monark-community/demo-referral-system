@@ -79,6 +79,7 @@ async function marketing(page, v) {
     ? [
         ["home", ""],
         ["how-it-works", "/how-it-works"],
+        ["developers", "/developers"],
         ["credits", "/credits"],
         ["pricing", "/pricing"],
         ["404", "/this-page-does-not-exist"],
@@ -123,9 +124,9 @@ async function appFlows(page, v) {
 
   // Flow 1 failure: reject the sign-in.
   await page.evaluate(() => {
-    const s = JSON.parse(localStorage.getItem("reffinity-demo-v1"))
+    const s = JSON.parse(localStorage.getItem("reffinity-demo-v2"))
     s.wallet.status = "disconnected"
-    localStorage.setItem("reffinity-demo-v1", JSON.stringify(s))
+    localStorage.setItem("reffinity-demo-v2", JSON.stringify(s))
   })
   await page.reload({ waitUntil: "networkidle" })
   await page.getByRole("main").getByRole("button", { name: "Connect demo wallet" }).click()
@@ -224,6 +225,45 @@ async function appFlows(page, v) {
   await page.getByRole("radio", { name: "Raw clicks" }).click()
   await page.waitForTimeout(400)
   await shot(page, v, "app-04-leaderboard-clicks", true)
+
+  // Flow 6: complete a mission (the reward layer, from a participant's side).
+  await page.goto(`${BASE}/${v.locale}/app/missions`, { waitUntil: "networkidle" })
+  await page.getByRole("heading", { level: 1, name: "Missions" }).waitFor()
+  await page.waitForTimeout(300)
+  await shot(page, v, "app-07-missions", true)
+  await page.getByRole("button", { name: "Simulate: GovChain reports it done" }).click()
+  await prompt(page, "Report mission completion").waitFor()
+  await shot(page, v, "flow6-mission-prompt")
+  await prompt(page, "Report mission completion").getByRole("button", { name: "Confirm" }).click()
+  await page.getByText(/Completed\. Badge · First vote is yours\./).waitFor({ timeout: 10000 })
+  await page.getByText(/Completed\. Badge · First vote is yours\./).scrollIntoViewIfNeeded()
+  await shot(page, v, "flow6-mission-done")
+
+  // Flow 7: publish a mission as an app, then watch the trust gate pay a real person and refuse a farmed wallet.
+  await page.getByRole("button", { name: "Create a mission" }).click()
+  await page.getByRole("dialog", { name: "Create a mission" }).waitFor()
+  await page.waitForTimeout(700) // let the sheet finish sliding in
+  await page.getByRole("button", { name: /and publish$/ }).click()
+  await page.getByText("Describe the task.").waitFor()
+  await shot(page, v, "flow7-create-error")
+  await page.getByLabel("Your app").fill("Campus Hack Club")
+  await page.getByLabel("Mission", { exact: true }).fill("Ship your first pull request")
+  await shot(page, v, "flow7-create-sheet")
+  await page.getByRole("button", { name: "Lock 100.00 tUSDC and publish" }).click()
+  await prompt(page, "Publish mission").getByRole("button", { name: "Confirm" }).click()
+  await page.getByText("\"Ship your first pull request\" is live.").waitFor({ timeout: 10000 })
+  await page.waitForTimeout(400)
+  await shot(page, v, "flow7-published")
+  await page.getByRole("button", { name: "A farmed wallet (trust 18)" }).click()
+  await prompt(page, "Report mission completion").getByRole("button", { name: "Confirm" }).click()
+  await page.getByText(/Refused: trust 18 is below 50/).waitFor({ timeout: 10000 })
+  await page.getByText(/Refused: trust 18 is below 50/).scrollIntoViewIfNeeded()
+  await shot(page, v, "flow7-refused")
+  await page.getByRole("button", { name: "Léa (trust 91)" }).click()
+  await prompt(page, "Report mission completion").getByRole("button", { name: "Confirm" }).click()
+  await page.getByText(/was paid 5\.00 tUSDC/).waitFor({ timeout: 10000 })
+  await page.getByText(/was paid 5\.00 tUSDC/).scrollIntoViewIfNeeded()
+  await shot(page, v, "flow7-paid")
 
   // Fresh start: an unregistered wallet joins the program.
   await page.goto(`${BASE}/${v.locale}/app`, { waitUntil: "networkidle" })

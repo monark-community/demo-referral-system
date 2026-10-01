@@ -11,7 +11,7 @@ import type { DemoSettings, DemoState, TxSummary, WalletState } from "./types"
  * replacing this module, chain.ts and ops.ts; the UI only uses hooks and actions.
  */
 
-const STORAGE_KEY = "reffinity-demo-v1"
+const STORAGE_KEY = "reffinity-demo-v2"
 
 let state: DemoState | null = null
 let storageOk = true
@@ -36,7 +36,7 @@ function load(): DemoState | null {
     const raw = window.localStorage.getItem(STORAGE_KEY)
     if (!raw) return null
     const parsed = JSON.parse(raw) as DemoState
-    if (parsed?.version !== 1 || !Array.isArray(parsed.invites) || !Array.isArray(parsed.links)) return null
+    if (parsed?.version !== 2 || !Array.isArray(parsed.invites) || !Array.isArray(parsed.links) || !Array.isArray(parsed.missions)) return null
     // A reload never resumes a half-finished connection or replays an animation.
     if (parsed.wallet.status === "connecting") parsed.wallet.status = "disconnected"
     parsed.lastEvent = null

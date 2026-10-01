@@ -1,16 +1,33 @@
 import { seededAddress, seededHash } from "./ids"
-import { MILESTONES, YOU } from "./program"
-import type { Activity, DemoState, Invite, MilestoneId, TrackedLink, TrustSignal } from "./types"
+import { MILESTONES, MISSION_SEEDS, START_BALANCE, YOU } from "./program"
+import type { Activity, DemoState, Invite, MilestoneId, Mission, MissionProgress, TrackedLink, TrustSignal } from "./types"
 
-/** Seed copy that depends on the visitor's language (tracked link labels). */
+/** Seed copy that depends on the visitor's language (tracked link labels, mission titles and badges). */
 export interface SeedCopy {
   links: { discord: string; poster: string; slides: string }
+  missions: Record<string, { title: string; badge?: string }>
 }
 
 const DAY = 86_400_000
 
 function ago(now: number, days: number, hours = 0): string {
   return new Date(now - days * DAY - hours * 3_600_000).toISOString()
+}
+
+/** The Monark family's missions, open to every wallet (also on a fresh start). */
+function seedMissions(copy: SeedCopy, now: number): Mission[] {
+  return MISSION_SEEDS.map((m) => ({
+    id: m.id,
+    app: m.app,
+    title: copy.missions[m.id]?.title ?? m.id,
+    verify: m.verify,
+    reward: { ...m.reward, badge: m.reward.kind === "badge" ? copy.missions[m.id]?.badge : undefined },
+    minTrust: m.minTrust,
+    spots: m.spots,
+    filled: m.filled,
+    endsAt: ago(now, -m.endsIn),
+    hash: seededHash(`mission:${m.id}`),
+  }))
 }
 
 interface InviteSeed {
@@ -55,7 +72,7 @@ const INVITES: InviteSeed[] = [
 export function createSeed(copy: SeedCopy, options: { empty?: boolean } = {}): DemoState {
   const now = Date.now()
   const base: DemoState = {
-    version: 1,
+    version: 2,
     wallet: { status: "disconnected", address: YOU.address, name: YOU.name, lastError: null },
     registered: !options.empty,
     code: YOU.code,
@@ -64,6 +81,9 @@ export function createSeed(copy: SeedCopy, options: { empty?: boolean } = {}): D
     links: [],
     activity: [],
     claimed: "0",
+    missions: seedMissions(copy, now),
+    progress: {},
+    balance: START_BALANCE,
     settings: { slow: false, failNext: false },
     lastEvent: null,
   }
@@ -121,9 +141,32 @@ export function createSeed(copy: SeedCopy, options: { empty?: boolean } = {}): D
   }
   // Emma's 15 tUSDC were claimed after her 30-day milestone.
   activity.push({ id: "a-claim-1", kind: "claimed", at: ago(now, 20), amount: "15000000", hash: seededHash("claim-1") })
+  // Amara's own missions: one completed (its 10 tUSDC is claimable), one started.
+  const progress: Record<string, MissionProgress> = {}
+  for (const m of MISSION_SEEDS) {
+    if (m.startedDays === undefined) continue
+    const p: MissionProgress = { startedAt: ago(now, m.startedDays, 3) }
+    if (m.completedDays !== undefined) {
+      p.completedAt = ago(now, m.completedDays, 4)
+      p.hash = seededHash(`mission-done:${m.id}`)
+      activity.push({
+        id: `a-mission-${m.id}`,
+        kind: "missionDone",
+        at: p.completedAt,
+        missionId: m.id,
+        mission: copy.missions[m.id]?.title ?? m.id,
+        app: m.app,
+        rewardKind: m.reward.kind,
+        amount: m.reward.amount,
+        hash: p.hash,
+      })
+    }
+    progress[m.id] = p
+  }
+
   // A blocked self-referral attempt from a few days ago.
   activity.push({ id: "a-block-1", kind: "blocked", at: ago(now, 5, 2), reason: "self", name: YOU.name })
 
   activity.sort((a, b) => b.at.localeCompare(a.at))
-  return { ...base, invites, links, activity, claimed: "15000000" }
+  return { ...base, invites, links, activity, progress, claimed: "15000000" }
 }

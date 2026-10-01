@@ -1,5 +1,6 @@
 "use client"
 
+import { AwardIcon } from "lucide-react"
 import { useState } from "react"
 
 import { Button } from "@/components/ui/button"
@@ -9,7 +10,7 @@ import { t } from "@/i18n/t"
 import { useTx } from "@/lib/demo/chain"
 import { applyClaim } from "@/lib/demo/ops"
 import { PROGRAM, REWARD_DECIMALS, REWARD_SYMBOL } from "@/lib/demo/program"
-import { totals } from "@/lib/demo/selectors"
+import { totals, yourBadges } from "@/lib/demo/selectors"
 import { getDemo, useDemo } from "@/lib/demo/store"
 import { formatReward, shortAddress } from "@/lib/format"
 
@@ -48,6 +49,7 @@ export function RewardsCard() {
   }
 
   const used = BigInt(PROGRAM.poolUsed) + BigInt(demo.claimed) - 15_000_000n
+  const badges = yourBadges(demo)
 
   return (
     <section aria-labelledby="rewards-title" className="rounded-3xl border bg-card p-5 sm:p-6">
@@ -75,6 +77,19 @@ export function RewardsCard() {
           <dd className="mt-0.5 font-bold tabular-nums text-warning">{formatReward(tot.held, locale)}</dd>
         </div>
       </dl>
+      {badges.length > 0 ? (
+        <div className="mt-3">
+          <p className="text-sm text-muted-foreground">{r.badges}</p>
+          <ul className="mt-1.5 flex flex-wrap gap-2">
+            {badges.map((b) => (
+              <li key={b.id} className="inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-2.5 py-1 text-xs font-bold" title={b.app}>
+                <AwardIcon className="size-3.5 text-primary-ink" aria-hidden="true" />
+                {b.name}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
       <div className="mt-5 flex flex-col gap-3">
         {claimable > 0n ? (
           <Button size="lg" className="w-full" onClick={claim} disabled={tx.busy}>
