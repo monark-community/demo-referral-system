@@ -261,8 +261,9 @@ async function appFlows(page, v) {
   await shot(page, v, "flow7-refused")
   await page.getByRole("button", { name: "Léa (trust 91)" }).click()
   await prompt(page, "Report mission completion").getByRole("button", { name: "Confirm" }).click()
-  await page.getByText(/was paid 5\.00 tUSDC/).waitFor({ timeout: 10000 })
-  await page.getByText(/was paid 5\.00 tUSDC/).scrollIntoViewIfNeeded()
+  // The amount and symbol are joined by a non-breaking space (formatReward), hence \s.
+  await page.getByText(/was paid 5\.00\stUSDC/).waitFor({ timeout: 10000 })
+  await page.getByText(/was paid 5\.00\stUSDC/).scrollIntoViewIfNeeded()
   await shot(page, v, "flow7-paid")
 
   // Fresh start: an unregistered wallet joins the program.
