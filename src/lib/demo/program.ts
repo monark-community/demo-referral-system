@@ -1,5 +1,5 @@
 import { seededAddress } from "./ids"
-import type { MilestoneDef, MilestoneId, TrustSignal } from "./types"
+import type { MilestoneDef, MilestoneId, MissionReward, TrustSignal, VerifyMethod } from "./types"
 
 /** The one program this demo runs: Monark Ambassadors, Fall 2026. */
 
@@ -39,10 +39,72 @@ export const YOU = {
   name: "Amara Okafor",
   address: seededAddress("amara-okafor"),
   code: "amara-7k2q",
+  walletMonths: 26,
 }
 
 /** The ambassador who invited Amara: inviting her back would be a loop. */
-export const YOUR_REFERRER = { name: "Priya Natarajan", address: seededAddress("priya-natarajan") }
+export const YOUR_REFERRER = { name: "Priya Natarajan", address: seededAddress("priya-natarajan"), trust: 88 }
+
+/**
+ * Network Trust: how a wallet's connections move its own score.
+ * Being invited by a trusted wallet vouches for you; each person you invited
+ * who turns out verified adds a little (capped), each one held for review costs more.
+ */
+export const NETWORK_WEIGHTS = {
+  walletAge: 20,
+  vouched: 8,
+  perVerifiedInvite: 2,
+  verifiedInvitesCap: 16,
+  perHeldInvite: -7,
+}
+
+/* ---------------------------------------------------------------------------
+ * Reward layer: missions published by apps in the Monark family.
+ * Titles and badge names are localized in the seed copy (by id).
+ * ------------------------------------------------------------------------ */
+
+export interface MissionSeed {
+  id: string
+  app: string
+  verify: VerifyMethod
+  reward: Omit<MissionReward, "badge">
+  minTrust: number
+  spots: number
+  filled: number
+  /** Days until the mission ends. */
+  endsIn: number
+  /** Your progress: days ago you started / completed it. */
+  startedDays?: number
+  completedDays?: number
+}
+
+export const MISSION_SEEDS: MissionSeed[] = [
+  { id: "taskflow-bounty", app: "TaskFlow", verify: "onchain", reward: { kind: "token", amount: usdc(10) }, minTrust: 50, spots: 200, filled: 143, endsIn: 75, startedDays: 20, completedDays: 16 },
+  { id: "govchain-vote", app: "GovChain", verify: "onchain", reward: { kind: "badge", amount: "1" }, minTrust: 60, spots: 1000, filled: 418, endsIn: 40, startedDays: 2 },
+  { id: "fluidswap-swap", app: "Fluidswap", verify: "onchain", reward: { kind: "points", amount: "40" }, minTrust: 50, spots: 500, filled: 312, endsIn: 60 },
+  { id: "trustrate-review", app: "TrustRate", verify: "api", reward: { kind: "token", amount: usdc(5) }, minTrust: 70, spots: 150, filled: 61, endsIn: 30 },
+  { id: "monark-workshop", app: "Monark", verify: "organizer", reward: { kind: "token", amount: usdc(50) }, minTrust: 85, spots: 20, filled: 12, endsIn: 70 },
+]
+
+/** tUSDC in the demo wallet, available to fund the missions you publish. */
+export const START_BALANCE = usdc(250)
+
+/** Limits of the "Create a mission" form. */
+export const MISSION_LIMITS = {
+  titleMax: 60,
+  appMax: 30,
+  badgeMax: 30,
+  spotsMax: 10_000,
+  tokenMax: 1_000,
+  pointsMax: 1_000,
+  trustOptions: [0, 50, 70, 85],
+}
+
+/** The two wallets that report completions of a mission you publish (demo). */
+export const MISSION_TESTERS = {
+  verified: { name: "Léa Tremblay", trust: 91 },
+  farmed: { address: seededAddress("farm-cluster:7"), trust: 18 },
+}
 
 /** A member who already joined through someone else's invitation. */
 export const ALREADY_MEMBER = { name: "Noah Fischer", address: seededAddress("noah-fischer"), joinedAt: "2026-08-14T15:20:00Z" }

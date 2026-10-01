@@ -1,6 +1,6 @@
 "use client"
 
-import { CheckIcon, CircleAlertIcon, PlusIcon, SparklesIcon } from "lucide-react"
+import { CheckIcon, CircleAlertIcon, GiftIcon, PlusIcon, SparklesIcon } from "lucide-react"
 import { useEffect, useState, useSyncExternalStore } from "react"
 
 import { NetworkGraph, type GraphAnimation, type GraphNode } from "@/components/diagrams/network-graph"
@@ -16,12 +16,12 @@ export interface HeroCopy {
   verified: string
   feedTitle: string
   you: string
-  events: { recorded: string; milestone: string; reward: string; held: string }
+  events: { recorded: string; milestone: string; reward: string; held: string; mission: string; share: string }
   milestones: { workshop: string; bounty: string }
   rewardTag: string
 }
 
-type FeedItem = { id: number; icon: "join" | "milestone" | "held"; text: string; sub?: string }
+type FeedItem = { id: number; icon: "join" | "milestone" | "held" | "mission"; text: string; sub?: string }
 
 const START: GraphNode[] = [
   { id: "emma", initials: "EW", name: "Emma", status: "completed", progress: 4 },
@@ -55,6 +55,14 @@ const STEPS: Step[] = [
     feed: (c) => ({ icon: "milestone", text: t(c.events.milestone, { name: "Sofia Marín", milestone: c.milestones.workshop }), sub: t(c.events.reward, { points: 25 }) }),
   },
   {
+    // The reward layer: Léa finishes a partner app's mission, and her inviter gets a share.
+    apply: (n) => n,
+    anim: { kind: "reward", nodeId: "lea", points: 4 },
+    points: 4,
+    verified: 0,
+    feed: (c) => ({ icon: "mission", text: t(c.events.mission, { name: "Léa Tremblay", app: "Fluidswap" }), sub: t(c.events.share, { points: 4 }) }),
+  },
+  {
     apply: (n) => [...n, { id: "burst", initials: "0x", name: "0x9d…41c7", status: "held", progress: 1 }],
     anim: { kind: "recorded", nodeId: "burst" },
     points: 0,
@@ -81,8 +89,9 @@ const START_POINTS = 330
 const START_VERIFIED = 5
 
 /**
- * The home hero's product visual: Amara's referral network playing one loop
- * of real events (a join, a milestone reward, a held wallet, a bounty). With
+ * The home hero's product visual: Amara's trust network playing one loop
+ * of real events (a join, a milestone reward, a partner mission paying an
+ * inviter share, a held wallet, a bounty). With
  * reduced motion it shows the final state without animating.
  */
 export function HeroNetwork({ copy, locale }: { copy: HeroCopy; locale: string }) {
@@ -169,7 +178,15 @@ export function HeroNetwork({ copy, locale }: { copy: HeroCopy; locale: string }
                   )}
                   aria-hidden="true"
                 >
-                  {item.icon === "join" ? <PlusIcon className="size-3.5" /> : item.icon === "milestone" ? <CheckIcon className="size-3.5" /> : <CircleAlertIcon className="size-3.5" />}
+                  {item.icon === "join" ? (
+                    <PlusIcon className="size-3.5" />
+                  ) : item.icon === "milestone" ? (
+                    <CheckIcon className="size-3.5" />
+                  ) : item.icon === "mission" ? (
+                    <GiftIcon className="size-3.5" />
+                  ) : (
+                    <CircleAlertIcon className="size-3.5" />
+                  )}
                 </span>
                 <span className="min-w-0">
                   <span className="block font-semibold">{item.text}</span>

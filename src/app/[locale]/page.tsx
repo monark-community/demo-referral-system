@@ -2,18 +2,21 @@ import {
   ArrowRightIcon,
   AwardIcon,
   BanIcon,
-  CalendarCheckIcon,
   CircleCheckIcon,
   CircleAlertIcon,
-  FileSignatureIcon,
-  QrCodeIcon,
+  CoinsIcon,
+  GiftIcon,
+  HandCoinsIcon,
+  NetworkIcon,
   ShieldCheckIcon,
+  SparklesIcon,
 } from "lucide-react"
 import type { Metadata } from "next"
 import Image from "next/image"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 
+import { CodeBlock } from "@/components/diagrams/code-block"
 import { TrustGauge } from "@/components/diagrams/trust-gauge"
 import { HeroNetwork } from "@/components/home/hero-network"
 import { SectionDivider } from "@/components/site/section-divider"
@@ -23,6 +26,7 @@ import { href, isLocale } from "@/i18n/config"
 import { getDictionary } from "@/i18n"
 import { pageMetadata } from "@/lib/metadata"
 import { PHOTOS } from "@/lib/photos"
+import { SDK_SHORT } from "@/lib/snippets"
 
 export async function generateMetadata({ params }: PageProps<"/[locale]">): Promise<Metadata> {
   const { locale } = await params
@@ -31,14 +35,18 @@ export async function generateMetadata({ params }: PageProps<"/[locale]">): Prom
   return pageMetadata(locale, "/", null, d.meta.description)
 }
 
-const STEP_ICONS = [QrCodeIcon, FileSignatureIcon, CalendarCheckIcon, AwardIcon]
+/** Tokens, points, badges, inviter share (same order as home.missions.types). */
+const REWARD_ICONS = [CoinsIcon, SparklesIcon, AwardIcon, HandCoinsIcon]
 
 export default async function Home({ params }: PageProps<"/[locale]">) {
   const { locale } = await params
   if (!isLocale(locale)) notFound()
   const dict = getDictionary(locale)
   const d = dict.home
-  const photos = [PHOTOS.invite, PHOTOS.workshop, PHOTOS.meetup]
+  const layers = [
+    { key: "trust", copy: d.layers.trust, photo: PHOTOS.invite, icon: NetworkIcon, href: "/how-it-works" },
+    { key: "rewards", copy: d.layers.rewards, photo: PHOTOS.workshop, icon: GiftIcon, href: "/developers" },
+  ]
 
   return (
     <>
@@ -67,7 +75,7 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
                 </Link>
               </Button>
               <Button asChild size="lg" variant="outline">
-                <Link href={href(locale, "/how-it-works")}>{d.secondary}</Link>
+                <Link href={href(locale, "/developers")}>{d.secondary}</Link>
               </Button>
             </div>
           </div>
@@ -90,38 +98,54 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
 
       <SectionDivider />
 
-      {/* Steps */}
-      <section aria-labelledby="steps-title" className="border-y bg-secondary/40">
+      {/* Two layers, equal weight: Network Trust and Rewards */}
+      <section aria-labelledby="layers-title" className="border-y bg-secondary/40">
         <div className="mx-auto w-full max-w-6xl px-4 py-14 sm:px-6 lg:py-20">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-            <h2 id="steps-title" className="max-w-xl text-3xl font-bold tracking-display sm:text-[2rem]">
-              {d.steps.title}
-            </h2>
-            <Link href={href(locale, "/how-it-works")} className="inline-flex min-h-11 items-center gap-1.5 font-bold text-primary-ink underline underline-offset-4">
-              {d.steps.more}
-              <ArrowRightIcon className="size-4" aria-hidden="true" />
-            </Link>
-          </div>
-          <ol className="relative mt-10 grid gap-8 md:grid-cols-4 md:gap-6">
-            {/* The line the steps sit on (line art, flat orange) */}
-            <span aria-hidden="true" className="absolute top-6 right-[12%] left-[12%] hidden h-0.5 rounded-full bg-primary md:block" />
-            <span aria-hidden="true" className="absolute top-6 bottom-6 left-6 w-0.5 rounded-full bg-primary md:hidden" />
-            {d.steps.items.map((step, i) => {
-              const Icon = STEP_ICONS[i] ?? AwardIcon
+          <h2 id="layers-title" className="max-w-xl text-3xl font-bold tracking-display sm:text-[2rem]">
+            {d.layers.title}
+          </h2>
+          <div className="mt-10 grid gap-6 md:grid-cols-2">
+            {layers.map((layer) => {
+              const Icon = layer.icon
               return (
-                <li key={step.title} className="relative flex gap-4 md:flex-col md:items-center md:text-center">
-                  <span className="relative z-10 flex size-12 shrink-0 items-center justify-center rounded-full border-2 border-primary bg-background">
-                    <Icon className="size-5 text-foreground" strokeWidth={1.75} aria-hidden="true" />
-                  </span>
-                  <div>
-                    <p className="text-xs font-bold text-primary-ink">{String(i + 1).padStart(2, "0")}</p>
-                    <h3 className="mt-1 text-lg font-bold">{step.title}</h3>
-                    <p className="mt-1.5 text-muted-foreground">{step.body}</p>
+                <article key={layer.key} aria-labelledby={`layer-${layer.key}`} className="flex flex-col overflow-hidden rounded-3xl border bg-card">
+                  <Image
+                    src={layer.photo.src}
+                    alt={layer.copy.alt}
+                    width={layer.photo.width}
+                    height={layer.photo.height}
+                    sizes="(min-width: 768px) 50vw, 100vw"
+                    className="aspect-[16/9] w-full object-cover"
+                  />
+                  <div className="flex flex-1 flex-col p-6 sm:p-8">
+                    <p className="eyebrow flex items-center gap-2 text-primary-ink">
+                      <Icon className="size-4" strokeWidth={2} aria-hidden="true" />
+                      {layer.copy.eyebrow}
+                    </p>
+                    <h3 id={`layer-${layer.key}`} className="mt-3 text-2xl font-extrabold tracking-display">
+                      {layer.copy.title}
+                    </h3>
+                    <p className="mt-2 text-muted-foreground">{layer.copy.body}</p>
+                    <ul className="mt-5 flex flex-col gap-2.5">
+                      {layer.copy.points.map((point) => (
+                        <li key={point} className="flex items-start gap-3 font-semibold">
+                          <CircleCheckIcon className="mt-0.5 size-5 shrink-0 text-primary" strokeWidth={1.75} aria-hidden="true" />
+                          {point}
+                        </li>
+                      ))}
+                    </ul>
+                    <Link
+                      href={href(locale, layer.href)}
+                      className="mt-auto inline-flex min-h-11 items-center gap-1.5 self-start pt-6 font-bold text-primary-ink underline underline-offset-4"
+                    >
+                      {layer.copy.link}
+                      <ArrowRightIcon className="size-4" aria-hidden="true" />
+                    </Link>
                   </div>
-                </li>
+                </article>
               )
             })}
-          </ol>
+          </div>
         </div>
       </section>
 
@@ -179,32 +203,39 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
         </div>
       </section>
 
-      {/* Audiences */}
-      <section aria-labelledby="who-title" className="mx-auto w-full max-w-6xl px-4 pb-14 sm:px-6 lg:pb-20">
-        <h2 id="who-title" className="max-w-2xl text-3xl font-bold tracking-display sm:text-[2rem]">
-          {d.audiences.title}
-        </h2>
-        <ul className="mt-10 grid gap-6 md:grid-cols-3">
-          {d.audiences.items.map((item, i) => {
-            const photo = photos[i]!
-            return (
-              <li key={item.title} className="overflow-hidden rounded-3xl border bg-card">
-                <Image
-                  src={photo.src}
-                  alt={item.alt}
-                  width={photo.width}
-                  height={photo.height}
-                  sizes="(min-width: 768px) 33vw, 100vw"
-                  className="aspect-[4/3] w-full object-cover"
-                />
-                <div className="p-6">
-                  <h3 className="text-xl font-bold">{item.title}</h3>
-                  <p className="mt-2 text-muted-foreground">{item.body}</p>
-                </div>
-              </li>
-            )
-          })}
-        </ul>
+      {/* Missions: the reward layer, for app builders */}
+      <section aria-labelledby="missions-title" className="border-y bg-secondary/40">
+        <div className="mx-auto grid w-full max-w-6xl gap-10 px-4 py-14 sm:px-6 lg:grid-cols-[5fr_7fr] lg:items-center lg:py-20">
+          <div>
+            <h2 id="missions-title" className="text-3xl font-bold tracking-display sm:text-[2rem]">
+              {d.missions.title}
+            </h2>
+            <p className="mt-3 text-muted-foreground">{d.missions.body}</p>
+            <ul className="mt-8 grid grid-cols-2 gap-3">
+              {d.missions.types.map((type, i) => {
+                const Icon = REWARD_ICONS[i] ?? AwardIcon
+                return (
+                  <li key={type.title} className="rounded-2xl border bg-card p-4">
+                    <Icon className="size-5 text-primary" strokeWidth={1.75} aria-hidden="true" />
+                    <p className="mt-2 font-bold">{type.title}</p>
+                    <p className="text-sm text-muted-foreground">{type.body}</p>
+                  </li>
+                )
+              })}
+            </ul>
+            <Link
+              href={href(locale, "/developers")}
+              className="mt-6 inline-flex min-h-11 items-center gap-1.5 font-bold text-primary-ink underline underline-offset-4"
+            >
+              {d.missions.cta}
+              <ArrowRightIcon className="size-4" aria-hidden="true" />
+            </Link>
+          </div>
+          <figure className="min-w-0">
+            <CodeBlock code={SDK_SHORT} label={d.missions.codeLabel} />
+            <figcaption className="mt-2 text-xs text-muted-foreground">{d.missions.codeLabel}</figcaption>
+          </figure>
+        </div>
       </section>
 
       {/* FAQ */}

@@ -19,6 +19,7 @@ export function SiteHeader({ locale, dict }: { locale: Locale; dict: Dictionary 
   const items = [
     { href: href(locale), label: c.nav.overview },
     { href: href(locale, "/how-it-works"), label: c.nav.how },
+    { href: href(locale, "/developers"), label: c.nav.developers },
     { href: href(locale, "/app"), label: c.nav.demo },
   ]
   const appHref = href(locale, "/app")

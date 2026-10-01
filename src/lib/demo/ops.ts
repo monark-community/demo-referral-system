@@ -1,10 +1,10 @@
 "use client"
 
 import { randomId, slugify } from "./ids"
-import { ALREADY_MEMBER, milestoneDef, YOUR_REFERRER } from "./program"
-import { trustScore } from "./selectors"
+import { ALREADY_MEMBER, MISSION_TESTERS, milestoneDef, YOUR_REFERRER } from "./program"
+import { trustScore, yourTrust } from "./selectors"
 import { getDemo, update } from "./store"
-import type { Activity, BlockReason, DemoState, Invite, MilestoneId, TrackedLink, TrustSignal } from "./types"
+import type { Activity, BlockReason, DemoState, Invite, MilestoneId, Mission, MissionReward, TrackedLink, TrustSignal, TxError, VerifyMethod } from "./types"
 
 /**
  * State changes applied when a simulated transaction confirms, plus the
@@ -101,11 +101,12 @@ export function applyMilestone(inviteId: string, milestone: MilestoneId, hash: s
   })
 }
 
-/** claimRewards() confirmed. */
+/** claimRewards() confirmed: the tUSDC lands in your wallet. */
 export function applyClaim(amount: bigint, hash: string) {
   update((s) => ({
     ...s,
     claimed: (BigInt(s.claimed) + amount).toString(),
+    balance: (BigInt(s.balance) + amount).toString(),
     activity: pushActivity(s, { kind: "claimed", amount: amount.toString(), hash }),
   }))
 }
@@ -151,4 +152,100 @@ export function registerOpen(tag: string | null): string | null {
 
 export function clearLastEvent() {
   update((s) => (s.lastEvent ? { ...s, lastEvent: null } : s))
+}
+
+/* ---------------------------------------------------------------------------
+ * Missions (reward layer).
+ * ------------------------------------------------------------------------ */
+
+/** Opening a mission in its app is off-chain: it only marks it as started for you. */
+export function startMission(id: string) {
+  update((s) => (s.progress[id]?.startedAt ? s : { ...s, progress: { ...s.progress, [id]: { startedAt: nowIso() } } }))
+}
+
+/** The mission contract's trust gate, evaluated when the completion is mined. */
+export function missionGate(id: string): TxError | null {
+  const s = getDemo()
+  const m = s?.missions.find((x) => x.id === id)
+  if (!s || !m) return "reverted"
+  return yourTrust(s).score < m.minTrust ? "lowTrust" : null
+}
+
+/** completeMission(wallet) reported by the app and confirmed: the reward is yours. */
+export function applyMissionDone(id: string, hash: string) {
+  update((s) => {
+    const m = s.missions.find((x) => x.id === id)
+    if (!m) return s
+    return {
+      ...s,
+      missions: s.missions.map((x) => (x.id === id ? { ...x, filled: x.filled + 1 } : x)),
+      progress: { ...s.progress, [id]: { ...s.progress[id], completedAt: nowIso(), hash } },
+      activity: pushActivity(s, { kind: "missionDone", missionId: id, mission: m.title, app: m.app, rewardKind: m.reward.kind, amount: m.reward.amount, hash }),
+    }
+  })
+}
+
+export interface MissionDraft {
+  app: string
+  title: string
+  verify: VerifyMethod
+  reward: MissionReward
+  spots: number
+  minTrust: number
+}
+
+export type MissionDraftError = "appRequired" | "titleRequired" | "titleTooLong" | "amount" | "badgeRequired" | "spots" | "balance"
+
+/** tUSDC a draft locks in escrow when published (0 for points and badges). */
+export function draftBudget(d: Pick<MissionDraft, "reward" | "spots">): bigint {
+  if (d.reward.kind !== "token" || !/^\d+$/.test(d.reward.amount) || !Number.isSafeInteger(d.spots)) return 0n
+  return BigInt(d.reward.amount) * BigInt(Math.max(0, d.spots))
+}
+
+/** publishMission() confirmed: the mission is live and its token budget sits in escrow. */
+export function applyPublish(d: MissionDraft, hash: string): Mission {
+  const mission: Mission = {
+    id: randomId("ms"),
+    app: d.app.trim(),
+    title: d.title.trim(),
+    verify: d.verify,
+    reward: d.reward,
+    minTrust: d.minTrust,
+    spots: d.spots,
+    filled: 0,
+    refused: 0,
+    endsAt: new Date(Date.now() + 60 * 86_400_000).toISOString(),
+    yours: true,
+    hash,
+  }
+  const budget = draftBudget(d)
+  update((s) => ({
+    ...s,
+    missions: [mission, ...s.missions],
+    balance: (BigInt(s.balance) - budget).toString(),
+    activity: pushActivity(s, { kind: "missionPublished", missionId: mission.id, mission: mission.title, app: mission.app, rewardKind: d.reward.kind, amount: budget.toString(), hash }),
+  }))
+  return mission
+}
+
+export type Tester = keyof typeof MISSION_TESTERS
+
+/**
+ * Your app reports that a wallet completed your mission. The trust gate pays a
+ * verified wallet from escrow and refuses a farmed one (unless your minimum is 0).
+ * Returns whether the wallet was paid.
+ */
+export function applyReport(id: string, tester: Tester, hash: string): boolean {
+  const s = getDemo()
+  const m = s?.missions.find((x) => x.id === id)
+  if (!m || m.filled >= m.spots) return false
+  const paid = MISSION_TESTERS[tester].trust >= m.minTrust
+  update((st) => ({
+    ...st,
+    missions: st.missions.map((x) => (x.id === id ? (paid ? { ...x, filled: x.filled + 1 } : { ...x, refused: (x.refused ?? 0) + 1 }) : x)),
+    activity: paid
+      ? st.activity
+      : pushActivity(st, { kind: "missionRefused", missionId: id, mission: m.title, app: m.app, trust: MISSION_TESTERS[tester].trust, hash }),
+  }))
+  return paid
 }

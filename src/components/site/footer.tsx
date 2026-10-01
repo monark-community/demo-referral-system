@@ -20,6 +20,7 @@ export function SiteFooter({ locale, dict }: { locale: Locale; dict: Dictionary 
   const links = [
     { href: href(locale), label: c.nav.overview },
     { href: href(locale, "/how-it-works"), label: c.nav.how },
+    { href: href(locale, "/developers"), label: c.nav.developers },
     { href: href(locale, "/app"), label: c.nav.demo },
     { href: href(locale, "/credits"), label: c.nav.credits },
   ]

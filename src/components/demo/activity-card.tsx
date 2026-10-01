@@ -1,6 +1,6 @@
 "use client"
 
-import { BanIcon, CircleAlertIcon, LinkIcon, PlusIcon, SparklesIcon, UserCheckIcon, WalletIcon } from "lucide-react"
+import { BanIcon, CircleAlertIcon, GiftIcon, LinkIcon, PlusIcon, RocketIcon, ShieldXIcon, SparklesIcon, UserCheckIcon, WalletIcon } from "lucide-react"
 import { useState } from "react"
 
 import { Button } from "@/components/ui/button"
@@ -20,6 +20,9 @@ const ICONS = {
   claimed: WalletIcon,
   blocked: BanIcon,
   linkCreated: LinkIcon,
+  missionDone: GiftIcon,
+  missionPublished: RocketIcon,
+  missionRefused: ShieldXIcon,
 } as const
 
 const PAGE = 4
@@ -50,7 +53,22 @@ export function ActivityCard() {
         return t(a.blocked[x.reason ?? "self"], { name })
       case "linkCreated":
         return t(a.linkCreated, { label: x.label ?? "" })
+      case "missionDone":
+        return t(a.missionDone, { mission: x.mission ?? "", app: x.app ?? "" })
+      case "missionPublished":
+        return t(a.missionPublished, { mission: x.mission ?? "" })
+      case "missionRefused":
+        return t(a.missionRefused, { mission: x.mission ?? "", trust: x.trust ?? 0 })
     }
+  }
+
+  // What a completed mission paid you, shown next to it like a milestone's points.
+  const gain = (x: Activity): string | null => {
+    if (x.kind === "milestone" && x.points) return t(a.milestoneGain, { points: x.points })
+    if (x.kind !== "missionDone" || !x.amount) return null
+    if (x.rewardKind === "token") return `+${formatReward(x.amount, locale)}`
+    if (x.rewardKind === "points") return t(a.milestoneGain, { points: x.amount })
+    return null
   }
 
   return (
@@ -70,10 +88,10 @@ export function ActivityCard() {
                   aria-hidden="true"
                   className={cn(
                     "mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full",
-                    x.kind === "blocked" && "bg-destructive/10 text-destructive",
+                    (x.kind === "blocked" || x.kind === "missionRefused") && "bg-destructive/10 text-destructive",
                     x.kind === "held" && "bg-warning/15 text-warning",
-                    (x.kind === "milestone" || x.kind === "recorded") && "bg-primary/15 text-primary-ink",
-                    (x.kind === "registered" || x.kind === "claimed" || x.kind === "linkCreated") && "bg-muted text-foreground"
+                    (x.kind === "milestone" || x.kind === "recorded" || x.kind === "missionDone") && "bg-primary/15 text-primary-ink",
+                    (x.kind === "registered" || x.kind === "claimed" || x.kind === "linkCreated" || x.kind === "missionPublished") && "bg-muted text-foreground"
                   )}
                 >
                   <Icon className="size-4" />
@@ -81,7 +99,7 @@ export function ActivityCard() {
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-semibold">
                     {describe(x)}
-                    {x.kind === "milestone" && x.points ? <span className="ml-1.5 text-xs font-bold text-primary-ink">{t(a.milestoneGain, { points: x.points })}</span> : null}
+                    {gain(x) ? <span className="ml-1.5 text-xs font-bold whitespace-nowrap text-primary-ink">{gain(x)}</span> : null}
                   </p>
                   <p className="text-xs text-muted-foreground">
                     <time dateTime={x.at} title={[formatDateTime(x.at, locale), x.hash ? `${app.tx.hash}: ${shortHash(x.hash)}` : ""].filter(Boolean).join(" · ")}>

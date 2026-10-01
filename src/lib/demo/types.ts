@@ -30,7 +30,21 @@ export interface MilestoneDef {
  */
 export type InviteStatus = "opened" | "joined" | "active" | "completed" | "held"
 
-export type TrustSignalKey = "walletAge" | "newWallet" | "history" | "checkIn" | "sharedFunding" | "burst"
+/**
+ * walletAge … burst: a wallet's own history.
+ * vouched, verifiedInvites, heldInvites: its connections (Network Trust): who
+ * invited it and how the people it invited turned out.
+ */
+export type TrustSignalKey =
+  | "walletAge"
+  | "newWallet"
+  | "history"
+  | "checkIn"
+  | "sharedFunding"
+  | "burst"
+  | "vouched"
+  | "verifiedInvites"
+  | "heldInvites"
 
 export interface TrustSignal {
   key: TrustSignalKey
@@ -67,7 +81,63 @@ export interface TrackedLink {
 
 export type BlockReason = "self" | "loop" | "duplicate"
 
-export type ActivityKind = "registered" | "recorded" | "held" | "milestone" | "claimed" | "blocked" | "linkCreated"
+/* ---------------------------------------------------------------------------
+ * Reward layer: missions that any app publishes, paid only to wallets whose
+ * trust score clears the mission's minimum.
+ * ------------------------------------------------------------------------ */
+
+/** token: tUSDC paid from the mission's escrowed budget. points: program score. badge: non-transferable NFT. */
+export type RewardKind = "token" | "points" | "badge"
+
+/** How the publishing app proves a wallet did the task. */
+export type VerifyMethod = "onchain" | "api" | "organizer"
+
+export interface MissionReward {
+  kind: RewardKind
+  /** token: base units per completion. points: points per completion. badge: 1. */
+  amount: string
+  /** badge only: the badge's name. */
+  badge?: string
+}
+
+export interface Mission {
+  id: string
+  /** The publishing app, e.g. "Fluidswap". */
+  app: string
+  title: string
+  verify: VerifyMethod
+  reward: MissionReward
+  /** Wallets below this trust score can't be paid by this mission. */
+  minTrust: number
+  /** Maximum completions (for tokens: budget = spots × amount, locked in escrow at publish). */
+  spots: number
+  /** Completions by everyone so far. */
+  filled: number
+  endsAt: string
+  /** Published from this wallet with "Create a mission". */
+  yours?: boolean
+  /** Completions this mission refused because the wallet's trust was too low (yours only). */
+  refused?: number
+  hash?: string
+}
+
+export interface MissionProgress {
+  startedAt?: string
+  completedAt?: string
+  hash?: string
+}
+
+export type ActivityKind =
+  | "registered"
+  | "recorded"
+  | "held"
+  | "milestone"
+  | "claimed"
+  | "blocked"
+  | "linkCreated"
+  | "missionDone"
+  | "missionPublished"
+  | "missionRefused"
 
 export interface Activity {
   id: string
@@ -82,6 +152,11 @@ export interface Activity {
   reason?: BlockReason
   trust?: number
   label?: string
+  /** Mission activity: the mission's id, title and app at the time. */
+  missionId?: string
+  mission?: string
+  app?: string
+  rewardKind?: RewardKind
   hash?: string
 }
 
@@ -106,7 +181,7 @@ export interface GraphEvent {
 }
 
 export interface DemoState {
-  version: 1
+  version: 2
   wallet: WalletState
   /** Registered as an ambassador for the program (the referral code exists). */
   registered: boolean
@@ -118,6 +193,11 @@ export interface DemoState {
   activity: Activity[]
   /** tUSDC already claimed, base units. */
   claimed: string
+  missions: Mission[]
+  /** Your progress per mission id. */
+  progress: Record<string, MissionProgress>
+  /** tUSDC you hold to fund missions you publish (base units). */
+  balance: string
   settings: DemoSettings
   lastEvent: GraphEvent | null
 }
@@ -137,7 +217,8 @@ export interface TxSummary {
   signer?: { name: string; address: string }
 }
 
-export type TxError = "rejected" | "reverted" | BlockReason
+/** lowTrust: the mission's trust gate refused the payout. */
+export type TxError = "rejected" | "reverted" | "lowTrust" | BlockReason
 
 export interface TxState {
   phase: "idle" | "signing" | "pending" | "confirmed" | "failed"

@@ -1,4 +1,4 @@
-import { ArrowRightIcon, BanIcon, ChevronRightIcon, CloudIcon, LinkIcon, RepeatIcon, UserRoundCheckIcon } from "lucide-react"
+import { ArrowRightIcon, BanIcon, CloudIcon, LinkIcon, RepeatIcon, UserRoundCheckIcon } from "lucide-react"
 import type { Metadata } from "next"
 import Link from "next/link"
 import { notFound } from "next/navigation"
@@ -9,7 +9,7 @@ import { SectionDivider } from "@/components/site/section-divider"
 import { Button } from "@/components/ui/button"
 import { href, isLocale } from "@/i18n/config"
 import { getDictionary, t } from "@/i18n"
-import { MILESTONES } from "@/lib/demo/program"
+import { MILESTONES, NETWORK_WEIGHTS } from "@/lib/demo/program"
 import type { TrustSignalKey } from "@/lib/demo/types"
 import { formatReward } from "@/lib/format"
 import { pageMetadata } from "@/lib/metadata"
@@ -23,7 +23,9 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/how-it-w
 
 const RULE_ICONS = [BanIcon, UserRoundCheckIcon, RepeatIcon]
 
-const SIGNALS: { key: TrustSignalKey; impact: string; vars: Record<string, string | number> }[] = [
+type SignalRow = { key: TrustSignalKey; impact: string; vars: Record<string, string | number> }
+
+const OWN_SIGNALS: SignalRow[] = [
   { key: "walletAge", impact: "+20", vars: { months: "6+" } },
   { key: "history", impact: "+10", vars: { networks: "2+" } },
   { key: "checkIn", impact: "+15", vars: {} },
@@ -32,13 +34,12 @@ const SIGNALS: { key: TrustSignalKey; impact: string; vars: Record<string, strin
   { key: "burst", impact: "−8", vars: { count: "5+", minutes: 2 } },
 ]
 
-const EVENTS = `// Reffinity referral contract (Solidity events, simplified)
-event AmbassadorRegistered(address indexed ambassador, bytes8 code, uint256 programId);
-event ReferralRecorded(address indexed inviter, address indexed invitee, uint256 programId);
-event ReferralRejected(address indexed invitee, bytes32 reason); // SelfReferral | AlreadyReferred | ReferralLoop
-event MilestoneReached(address indexed invitee, bytes32 milestone, uint32 points, uint256 reward);
-event RewardHeld(address indexed invitee, uint8 trustScore);
-event RewardsClaimed(address indexed ambassador, uint256 amount);`
+const w = NETWORK_WEIGHTS
+const networkSignals = (someone: string): SignalRow[] => [
+  { key: "vouched", impact: `+${w.vouched}`, vars: { name: someone, score: "50+" } },
+  { key: "verifiedInvites", impact: `+${w.perVerifiedInvite} × n (≤ ${w.verifiedInvitesCap})`, vars: { count: "n" } },
+  { key: "heldInvites", impact: `−${Math.abs(w.perHeldInvite)} × n`, vars: { count: "n" } },
+]
 
 export default async function HowItWorks({ params }: PageProps<"/[locale]/how-it-works">) {
   const { locale } = await params
@@ -78,7 +79,57 @@ export default async function HowItWorks({ params }: PageProps<"/[locale]/how-it
 
       <SectionDivider />
 
-      {/* 2. Milestones */}
+      {/* 2. Trust */}
+      <section aria-labelledby="trust-title" className="border-y bg-secondary/40">
+        <div className="mx-auto grid w-full max-w-6xl gap-8 px-4 py-14 sm:px-6 lg:grid-cols-[5fr_7fr]">
+          <div>
+            <h2 id="trust-title" className="text-3xl font-bold tracking-display">
+              {d.trust.title}
+            </h2>
+            <p className="mt-3 text-muted-foreground">{d.trust.body}</p>
+            <div className="mt-6 flex items-center gap-6 rounded-2xl border bg-card p-5">
+              <TrustGauge score={18} held label={dict.app.trust.title} status={d.trust.threshold} className="w-32 shrink-0" />
+              <p className="text-sm">{d.trust.example}</p>
+            </div>
+          </div>
+          <div className="overflow-hidden rounded-3xl border bg-card self-start">
+            <table className="w-full text-left text-sm">
+              <thead className="border-b bg-muted/50 text-xs font-bold text-muted-foreground">
+                <tr>
+                  <th scope="col" className="px-4 py-3 sm:px-6">
+                    {d.trust.headers.signal}
+                  </th>
+                  <th scope="col" className="px-4 py-3 text-right sm:px-6">
+                    {d.trust.headers.effect}
+                  </th>
+                </tr>
+              </thead>
+              {[
+                { title: d.trust.own, rows: OWN_SIGNALS },
+                { title: d.trust.network, rows: networkSignals(d.trust.someone) },
+              ].map((group) => (
+                <tbody key={group.title} className="divide-y border-b last:border-b-0">
+                  <tr>
+                    <th scope="rowgroup" colSpan={2} className="bg-muted/30 px-4 py-2 text-xs font-bold text-primary-ink sm:px-6">
+                      {group.title}
+                    </th>
+                  </tr>
+                  {group.rows.map((s) => (
+                    <tr key={s.key}>
+                      <th scope="row" className="px-4 py-3.5 font-semibold sm:px-6">
+                        {t(dict.app.trust.signals[s.key], s.vars)}
+                      </th>
+                      <td className={`px-4 py-3.5 text-right font-mono font-bold whitespace-nowrap sm:px-6 ${s.impact.startsWith("+") ? "text-success" : "text-warning"}`}>{s.impact}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              ))}
+            </table>
+          </div>
+        </div>
+      </section>
+
+      {/* 3. Milestones and missions */}
       <section aria-labelledby="ms-title" className="mx-auto w-full max-w-6xl px-4 py-14 sm:px-6">
         <h2 id="ms-title" className="text-3xl font-bold tracking-display">
           {d.milestones.title}
@@ -116,46 +167,13 @@ export default async function HowItWorks({ params }: PageProps<"/[locale]/how-it
           </table>
         </div>
         <p className="mt-4 max-w-3xl text-sm text-muted-foreground">{d.milestones.note}</p>
-      </section>
-
-      {/* 3. Trust */}
-      <section aria-labelledby="trust-title" className="border-y bg-secondary/40">
-        <div className="mx-auto grid w-full max-w-6xl gap-8 px-4 py-14 sm:px-6 lg:grid-cols-[5fr_7fr]">
-          <div>
-            <h2 id="trust-title" className="text-3xl font-bold tracking-display">
-              {d.trust.title}
-            </h2>
-            <p className="mt-3 text-muted-foreground">{d.trust.body}</p>
-            <div className="mt-6 flex items-center gap-6 rounded-2xl border bg-card p-5">
-              <TrustGauge score={18} held label={dict.app.trust.title} status={d.trust.threshold} className="w-32 shrink-0" />
-              <p className="text-sm">{d.trust.example}</p>
-            </div>
-          </div>
-          <div className="overflow-hidden rounded-3xl border bg-card self-start">
-            <table className="w-full text-left text-sm">
-              <thead className="border-b bg-muted/50 text-xs font-bold text-muted-foreground">
-                <tr>
-                  <th scope="col" className="px-4 py-3 sm:px-6">
-                    {d.trust.headers.signal}
-                  </th>
-                  <th scope="col" className="px-4 py-3 text-right sm:px-6">
-                    {d.trust.headers.effect}
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y">
-                {SIGNALS.map((s) => (
-                  <tr key={s.key}>
-                    <th scope="row" className="px-4 py-3.5 font-semibold sm:px-6">
-                      {t(dict.app.trust.signals[s.key], s.vars)}
-                    </th>
-                    <td className={`px-4 py-3.5 text-right font-mono font-bold sm:px-6 ${s.impact.startsWith("+") ? "text-success" : "text-warning"}`}>{s.impact}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <p className="mt-6 flex flex-wrap items-center gap-x-3 gap-y-1 font-semibold">
+          {d.milestones.missions}
+          <Link href={href(locale, "/developers")} className="inline-flex min-h-11 items-center gap-1.5 font-bold text-primary-ink underline underline-offset-4">
+            {d.milestones.missionsLink}
+            <ArrowRightIcon className="size-4" aria-hidden="true" />
+          </Link>
+        </p>
       </section>
 
       {/* 4. On/off chain */}
@@ -187,24 +205,6 @@ export default async function HowItWorks({ params }: PageProps<"/[locale]/how-it
             </ul>
           </div>
         </div>
-      </section>
-
-      {/* 5. Developers */}
-      <section aria-labelledby="dev-title" className="mx-auto w-full max-w-6xl px-4 pb-14 sm:px-6">
-        <h2 id="dev-title" className="text-3xl font-bold tracking-display">
-          {d.dev.title}
-        </h2>
-        <p className="mt-3 max-w-2xl text-muted-foreground">{d.dev.body}</p>
-        {/* Context on demand: the code sits behind a disclosure. */}
-        <details className="group mt-6">
-          <summary className="inline-flex min-h-11 cursor-pointer list-none items-center gap-1.5 font-bold text-primary-ink underline underline-offset-4 [&::-webkit-details-marker]:hidden">
-            <ChevronRightIcon className="size-4 transition-transform duration-150 group-open:rotate-90" aria-hidden="true" />
-            {d.dev.show}
-          </summary>
-          <pre className="mt-4 overflow-x-auto rounded-2xl border bg-foreground p-5 text-[13px] leading-relaxed text-background" tabIndex={0}>
-            <code translate="no">{EVENTS}</code>
-          </pre>
-        </details>
       </section>
 
       <section className="mx-auto w-full max-w-6xl px-4 pb-16 sm:px-6 lg:pb-24">
