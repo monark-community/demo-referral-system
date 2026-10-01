@@ -1,0 +1,89 @@
+"use client"
+
+import * as React from "react"
+
+import { cn } from "@/lib/utils"
+
+function formatBaseUnits(
+  value: bigint | string | number,
+  decimals: number,
+  maxFractionDigits: number,
+  locale?: string
+) {
+  const raw = typeof value === "bigint" ? value : BigInt(value)
+  const negative = raw < 0n
+  const abs = negative ? -raw : raw
+  const base = 10n ** BigInt(decimals)
+  const whole = abs / base
+  const frac = abs % base
+
+  const nf = new Intl.NumberFormat(locale)
+  const wholeStr = nf.format(whole)
+  if (maxFractionDigits === 0) {
+    return `${negative ? "-" : ""}${wholeStr}`
+  }
+  // Fixed fraction digits (25.00, not 25) and the locale's decimal separator (25,00 in French).
+  const sep = nf.formatToParts(1.5).find((p) => p.type === "decimal")?.value ?? "."
+  const fracStr = frac.toString().padStart(decimals, "0").slice(0, maxFractionDigits).padEnd(maxFractionDigits, "0")
+  return `${negative ? "-" : ""}${wholeStr}${sep}${fracStr}`
+}
+
+function formatUsd(
+  value: number,
+  currency: string,
+  locale?: string,
+  fractionDigits = 2
+) {
+  return new Intl.NumberFormat(locale, {
+    style: "currency",
+    currency,
+    maximumFractionDigits: fractionDigits,
+    minimumFractionDigits: fractionDigits,
+  }).format(value)
+}
+
+function TokenAmount({
+  value,
+  decimals = 18,
+  symbol,
+  fractionDigits = 4,
+  locale,
+  usdValue,
+  usdCurrency = "USD",
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLSpanElement> & {
+  value: bigint | string | number
+  decimals?: number
+  symbol?: string
+  fractionDigits?: number
+  locale?: string
+  usdValue?: number
+  usdCurrency?: string
+}) {
+  const formatted = formatBaseUnits(value, decimals, fractionDigits, locale)
+
+  return (
+    <span
+      data-slot="token-amount"
+      className={cn("inline-flex flex-col leading-tight", className)}
+      {...props}
+    >
+      <span className="inline-flex items-baseline gap-1 font-mono tabular-nums">
+        <span>{formatted}</span>
+        {symbol && (
+          <span className="text-muted-foreground text-[0.85em] font-sans">
+            {symbol}
+          </span>
+        )}
+      </span>
+      {typeof usdValue === "number" && (
+        <span className="text-muted-foreground text-xs tabular-nums">
+          {formatUsd(usdValue, usdCurrency, locale)}
+        </span>
+      )}
+    </span>
+  )
+}
+
+export { TokenAmount, formatBaseUnits, formatUsd }
