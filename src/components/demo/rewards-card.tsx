@@ -61,6 +61,7 @@ export function RewardsCard() {
           decimals={REWARD_DECIMALS}
           symbol={REWARD_SYMBOL}
           fractionDigits={2}
+          mono
           locale={intlLocale[locale]}
           className="mt-1 text-3xl font-extrabold"
         />
