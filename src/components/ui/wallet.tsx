@@ -4,7 +4,7 @@ import * as React from "react"
 import Jazzicon, { jsNumberForAddress } from "react-jazzicon"
 import { CheckIcon, CopyIcon } from "lucide-react"
 
-import { cn } from "@/lib/utils"
+import { cn } from "cn"
 import { Button } from "@/components/ui/button"
 
 function truncateAddress(address: string, start = 6, end = 4) {
@@ -22,6 +22,8 @@ function Wallet({
   name,
   size = "md",
   showCopy = true,
+  copyLabel,
+  copiedLabel,
   className,
   ...props
 }: React.HTMLAttributes<HTMLDivElement> & {
@@ -29,12 +31,16 @@ function Wallet({
   name?: string
   size?: WalletSize
   showCopy?: boolean
+  /** Copy button name before copying. Default "Copy address". */
+  copyLabel?: string
+  /** Copy button name once copied. Default "Address copied". */
+  copiedLabel?: string
 }) {
   return (
     <div
       data-slot="wallet"
       className={cn(
-        "inline-flex items-center gap-3 rounded-lg border bg-card p-2 pr-3 text-card-foreground shadow-xs",
+        "inline-flex max-w-full items-center gap-3 rounded-full border bg-card p-1 pr-2 text-card-foreground",
         className
       )}
       {...props}
@@ -42,7 +48,7 @@ function Wallet({
       <WalletAvatar address={address} size={avatarPx[size]} />
       <div className="flex min-w-0 flex-col leading-tight">
         {name && (
-          <span className={cn("truncate font-medium", nameText[size])}>
+          <span className={cn("truncate font-bold", nameText[size])}>
             {name}
           </span>
         )}
@@ -54,7 +60,13 @@ function Wallet({
           )}
         />
       </div>
-      {showCopy && <WalletCopyButton address={address} />}
+      {showCopy && (
+        <WalletCopyButton
+          address={address}
+          copyLabel={copyLabel}
+          copiedLabel={copiedLabel}
+        />
+      )}
     </div>
   )
 }
@@ -107,19 +119,26 @@ function WalletAddress({
 
 function WalletCopyButton({
   address,
+  copyLabel = "Copy address",
+  copiedLabel = "Address copied",
   className,
   ...props
 }: Omit<React.ComponentProps<typeof Button>, "children" | "onClick"> & {
   address: string
+  copyLabel?: string
+  copiedLabel?: string
 }) {
   const [copied, setCopied] = React.useState(false)
+  const timeout = React.useRef<number | undefined>(undefined)
+
+  React.useEffect(() => () => window.clearTimeout(timeout.current), [])
 
   const onCopy = React.useCallback(() => {
     if (!navigator.clipboard) return
     navigator.clipboard.writeText(address).then(() => {
       setCopied(true)
-      const id = window.setTimeout(() => setCopied(false), 1500)
-      return () => window.clearTimeout(id)
+      window.clearTimeout(timeout.current)
+      timeout.current = window.setTimeout(() => setCopied(false), 1500)
     })
   }, [address])
 
@@ -127,10 +146,10 @@ function WalletCopyButton({
     <Button
       type="button"
       variant="ghost"
-      size="icon"
+      size="icon-xs"
       onClick={onCopy}
-      aria-label={copied ? "Address copied" : "Copy address"}
-      className={cn("size-7", className)}
+      aria-label={copied ? copiedLabel : copyLabel}
+      className={className}
       {...props}
     >
       {copied ? (

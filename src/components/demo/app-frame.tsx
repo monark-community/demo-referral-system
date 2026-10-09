@@ -6,11 +6,12 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import type { ReactNode } from "react"
 
+import { AppLoading } from "@/components/ui/app-loading"
+import { AppTabs } from "@/components/ui/app-tabs"
 import { Button } from "@/components/ui/button"
 import { href } from "@/i18n/config"
 import { useDemo, useStorageOk } from "@/lib/demo/store"
 import { connectWallet } from "@/lib/demo/wallet"
-import { cn } from "@/lib/utils"
 
 import { useAppCopy } from "./app-provider"
 import { DemoControls } from "./demo-controls"
@@ -29,12 +30,7 @@ export function AppFrame({ children }: { children: ReactNode }) {
 
   return (
     <div className="flex flex-1 flex-col">
-      <div className="border-b bg-secondary/40">
-        <div className="mx-auto flex min-h-13 max-w-6xl items-center gap-2 px-4 sm:px-6">
-          {connected ? <AppSections /> : <span className="flex-1" />}
-          <DemoControls />
-        </div>
-      </div>
+      <AppSections connected={connected} />
       {!storageOk ? (
         <p role="alert" className="mx-auto mt-4 w-full max-w-6xl px-4 text-sm text-warning sm:px-6">
           {app.storageError}
@@ -47,56 +43,26 @@ export function AppFrame({ children }: { children: ReactNode }) {
   )
 }
 
-function AppSections() {
+/** The app's sub-bar: section tabs once the wallet is connected, and the network + demo controls pill. */
+function AppSections({ connected }: { connected: boolean }) {
   const { app, locale } = useAppCopy()
   const pathname = usePathname() ?? ""
-  const items = [
-    { href: href(locale, "/app"), label: app.sections.dashboard, icon: LayoutDashboardIcon, exact: true },
-    { href: href(locale, "/app/invite"), label: app.sections.invite, icon: Share2Icon, exact: false },
-    { href: href(locale, "/app/leaderboard"), label: app.sections.leaderboard, icon: TrophyIcon, exact: false },
-  ]
   return (
-    <nav aria-label={app.sections.label} className="min-w-0 flex-1">
-      <ul className="-mx-1 flex min-w-0 items-center gap-0.5 overflow-x-auto px-1 py-2 [scrollbar-width:none] sm:gap-1">
-        {items.map((item) => {
-          const active = item.exact ? pathname === item.href : pathname.startsWith(item.href)
-          const Icon = item.icon
-          return (
-            <li key={item.href} className="shrink-0">
-              <Link
-                href={item.href}
-                aria-current={active ? "page" : undefined}
-                className={cn(
-                  "inline-flex h-9 items-center gap-2 rounded-full px-2.5 text-sm font-semibold whitespace-nowrap transition-colors duration-150 sm:px-3.5",
-                  active ? "bg-card text-foreground ring-1 ring-border" : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                <Icon className="hidden size-4 sm:block" aria-hidden="true" />
-                {item.label}
-              </Link>
-            </li>
-          )
-        })}
-      </ul>
-    </nav>
-  )
-}
-
-export function AppLoading({ label }: { label: string }) {
-  return (
-    <div role="status" aria-live="polite" className="flex flex-col gap-4">
-      <span className="sr-only">{label}</span>
-      <div className="h-9 w-56 animate-pulse rounded-full bg-muted" />
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        {[0, 1, 2, 3].map((i) => (
-          <div key={i} className="h-24 animate-pulse rounded-2xl bg-muted" />
-        ))}
-      </div>
-      <div className="grid gap-4 lg:grid-cols-[7fr_5fr]">
-        <div className="h-80 animate-pulse rounded-3xl bg-muted" />
-        <div className="h-80 animate-pulse rounded-3xl bg-muted" />
-      </div>
-    </div>
+    <AppTabs
+      label={app.sections.label}
+      pathname={pathname}
+      LinkComponent={Link}
+      tabs={
+        connected
+          ? [
+              { href: href(locale, "/app"), label: app.sections.dashboard, icon: <LayoutDashboardIcon />, iconDesktopOnly: true, exact: true },
+              { href: href(locale, "/app/invite"), label: app.sections.invite, icon: <Share2Icon />, iconDesktopOnly: true },
+              { href: href(locale, "/app/leaderboard"), label: app.sections.leaderboard, icon: <TrophyIcon />, iconDesktopOnly: true },
+            ]
+          : []
+      }
+      actions={<DemoControls />}
+    />
   )
 }
 

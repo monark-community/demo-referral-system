@@ -4,6 +4,7 @@ import { BanIcon, CircleAlertIcon, LinkIcon, PlusIcon, SparklesIcon, UserCheckIc
 import { useState } from "react"
 
 import { Button } from "@/components/ui/button"
+import { Empty } from "@/components/ui/empty"
 import { t } from "@/i18n/t"
 import { useDemo } from "@/lib/demo/store"
 import type { Activity } from "@/lib/demo/types"
@@ -59,7 +60,9 @@ export function ActivityCard() {
         {a.title}
       </h2>
       {demo.activity.length === 0 ? (
-        <p className="mt-4 rounded-2xl border border-dashed p-4 text-sm text-muted-foreground">{a.empty}</p>
+        <Empty align="start" size="sm" className="mt-4">
+          {a.empty}
+        </Empty>
       ) : (
         <ol className="mt-4 flex flex-col gap-3.5">
           {items.map((x) => {

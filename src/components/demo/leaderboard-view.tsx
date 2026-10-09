@@ -4,6 +4,7 @@ import { CircleAlertIcon, TriangleAlertIcon } from "lucide-react"
 import { useState } from "react"
 
 import { InfoTip } from "@/components/ui/info-tip"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { WalletAvatar } from "@/components/ui/wallet"
 import { t } from "@/i18n/t"
 import { leaderboard } from "@/lib/demo/selectors"
@@ -39,23 +40,18 @@ export function LeaderboardView() {
           </div>
           <p className="mt-1 text-muted-foreground">{app.program}</p>
         </div>
-        <div role="radiogroup" aria-label={l.toggleLabel} className="inline-flex self-start rounded-full border bg-card p-1">
-          {(["points", "clicks"] as const).map((k) => (
-            <button
-              key={k}
-              type="button"
-              role="radio"
-              aria-checked={by === k}
-              onClick={() => setBy(k)}
-              className={cn(
-                "inline-flex h-10 items-center rounded-full px-4 text-sm font-bold transition-colors duration-150",
-                by === k ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              {k === "points" ? l.byPoints : l.byClicks}
-            </button>
-          ))}
-        </div>
+        <ToggleGroup
+          type="single"
+          variant="pill"
+          size="lg"
+          aria-label={l.toggleLabel}
+          value={by}
+          onValueChange={(v) => v && setBy(v as "points" | "clicks")}
+          className="self-start"
+        >
+          <ToggleGroupItem value="points">{l.byPoints}</ToggleGroupItem>
+          <ToggleGroupItem value="clicks">{l.byClicks}</ToggleGroupItem>
+        </ToggleGroup>
       </div>
 
       {/* Only the raw-clicks view needs a word: it shows why Reffinity doesn't rank that way. */}

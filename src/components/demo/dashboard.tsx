@@ -6,6 +6,8 @@ import { useEffect, useState } from "react"
 
 import { NetworkGraph, type GraphAnimation, type GraphNode } from "@/components/diagrams/network-graph"
 import { Button } from "@/components/ui/button"
+import { Empty } from "@/components/ui/empty"
+import { Stat, StatGroup, StatHint, StatLabel, StatValue } from "@/components/ui/stat"
 import { href } from "@/i18n/config"
 import { t } from "@/i18n/t"
 import { clearLastEvent } from "@/lib/demo/ops"
@@ -88,17 +90,17 @@ export function Dashboard() {
         </Button>
       </div>
 
-      <dl className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <StatGroup className="grid-cols-2">
         {stats.map((s) => (
-          <div key={s.label} className="rounded-2xl border bg-card p-4">
-            <dt className="text-sm text-muted-foreground">{s.label}</dt>
-            <dd className={cn("mt-1 text-2xl font-extrabold tabular-nums sm:text-[1.7rem]", s.tick && "rf-tick")} key={s.tick ? s.value : undefined}>
+          <Stat key={s.label}>
+            <StatLabel>{s.label}</StatLabel>
+            <StatValue className={cn(s.tick && "rf-tick")} key={s.tick ? s.value : undefined}>
               {s.value}
-            </dd>
-            {s.hint ? <dd className="mt-0.5 truncate text-xs text-muted-foreground">{s.hint}</dd> : null}
-          </div>
+            </StatValue>
+            {s.hint ? <StatHint className="truncate">{s.hint}</StatHint> : null}
+          </Stat>
         ))}
-      </dl>
+      </StatGroup>
 
       <div className="grid gap-6 lg:grid-cols-[7fr_5fr] lg:items-start">
         <div className="flex min-w-0 flex-col gap-6">
@@ -107,7 +109,9 @@ export function Dashboard() {
               {app.network.title}
             </h2>
             {nodes.length === 0 ? (
-              <p className="mt-4 rounded-2xl border border-dashed p-4 text-sm text-muted-foreground">{app.network.empty}</p>
+              <Empty align="start" size="sm" className="mt-4">
+                {app.network.empty}
+              </Empty>
             ) : (
               <>
                 <NetworkGraph

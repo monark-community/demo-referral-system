@@ -6,8 +6,7 @@ import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
-import { Switch } from "@/components/ui/switch"
+import { DemoControlsToggle } from "@/components/ui/demo-controls"
 import { NETWORK_NAME } from "@/lib/demo/program"
 import { resetDemo, setSettings, useDemo } from "@/lib/demo/store"
 
@@ -15,8 +14,10 @@ import { useAppCopy } from "./app-provider"
 
 /**
  * The app bar's one demo element: a pill showing the (simulated) network that
- * opens the demo controls: network speed, forced failure, and "Reset demo"
- * (example or from scratch).
+ * opens the demo controls: network speed, forced failure, and "Reset demo".
+ * Kept local rather than @monark/ui's DemoControls because the reset offers two
+ * targets (Amara's example or a wallet that hasn't joined); the switch rows are
+ * the registry's DemoControlsToggle.
  */
 export function DemoControls() {
   const demo = useDemo()
@@ -51,30 +52,14 @@ export function DemoControls() {
           {demo.settings.failNext || demo.settings.slow ? <span className="size-2 rounded-full bg-warning" aria-hidden="true" /> : null}
         </Button>
       </DialogTrigger>
-      <DialogContent closeLabel={app.close} className="sm:max-w-md">
-        <DialogHeader className="text-left">
-          <DialogTitle className="text-xl font-extrabold">{c.title}</DialogTitle>
+      <DialogContent closeLabel={app.close}>
+        <DialogHeader>
+          <DialogTitle>{c.title}</DialogTitle>
           <DialogDescription className="sr-only">{c.resetHint}</DialogDescription>
         </DialogHeader>
         <div className="flex flex-col divide-y rounded-2xl border">
-          <div className="flex items-start justify-between gap-4 p-4">
-            <div>
-              <Label htmlFor="ctl-slow" className="text-sm font-bold">
-                {c.slow}
-              </Label>
-              <p className="mt-1 text-xs text-muted-foreground">{c.slowHint}</p>
-            </div>
-            <Switch id="ctl-slow" checked={demo.settings.slow} onCheckedChange={(v) => setSettings({ slow: v })} />
-          </div>
-          <div className="flex items-start justify-between gap-4 p-4">
-            <div>
-              <Label htmlFor="ctl-fail" className="text-sm font-bold">
-                {c.failNext}
-              </Label>
-              <p className="mt-1 text-xs text-muted-foreground">{c.failNextHint}</p>
-            </div>
-            <Switch id="ctl-fail" checked={demo.settings.failNext} onCheckedChange={(v) => setSettings({ failNext: v })} />
-          </div>
+          <DemoControlsToggle id="ctl-slow" label={c.slow} hint={c.slowHint} checked={demo.settings.slow} onCheckedChange={(v) => setSettings({ slow: v })} />
+          <DemoControlsToggle id="ctl-fail" label={c.failNext} hint={c.failNextHint} checked={demo.settings.failNext} onCheckedChange={(v) => setSettings({ failNext: v })} />
         </div>
         <div className="rounded-2xl border p-4">
           {!confirming ? (
