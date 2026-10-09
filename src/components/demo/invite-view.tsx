@@ -7,14 +7,16 @@ import { toast } from "sonner"
 
 import { qrSvg, QrCode } from "@/components/diagrams/qr-code"
 import { Button } from "@/components/ui/button"
+import { Empty } from "@/components/ui/empty"
+import { FieldError } from "@/components/ui/field-error"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { href, intlLocale, SITE_URL } from "@/i18n/config"
 import { t } from "@/i18n/t"
 import { createLink, deleteLink, validateLinkLabel, type LinkError } from "@/lib/demo/ops"
 import { useDemo } from "@/lib/demo/store"
 import { formatNumber } from "@/lib/format"
-import { cn } from "@/lib/utils"
 
 import { useAppCopy } from "./app-provider"
 import { CopyButton } from "./copy-button"
@@ -100,7 +102,7 @@ export function InviteView() {
                 {inv.linksTitle}
               </h2>
               <form onSubmit={add} noValidate className="mt-4 flex flex-col gap-2">
-                <Label htmlFor={inputId} className="text-sm font-bold">
+                <Label htmlFor={inputId}>
                   {inv.label}
                 </Label>
                 <div className="flex flex-col gap-2 sm:flex-row">
@@ -116,20 +118,18 @@ export function InviteView() {
                       if (error) setError(null)
                     }}
                   />
-                  <Button type="submit" variant="outline" className="h-11 shrink-0">
+                  <Button type="submit" variant="outline" className="shrink-0">
                     <PlusIcon aria-hidden="true" />
                     {inv.add}
                   </Button>
                 </div>
-                {error ? (
-                  <p id={errorId} role="alert" className="text-sm font-semibold text-destructive">
-                    {inv.errors[error]}
-                  </p>
-                ) : null}
+                <FieldError id={errorId}>{error ? inv.errors[error] : null}</FieldError>
               </form>
             </div>
             {demo.links.length === 0 ? (
-              <p className="mx-5 mb-5 rounded-2xl border border-dashed p-4 text-sm text-muted-foreground sm:mx-6 sm:mb-6">{inv.linksEmpty}</p>
+              <Empty align="start" size="sm" className="mx-5 mb-5 w-auto sm:mx-6 sm:mb-6">
+                {inv.linksEmpty}
+              </Empty>
             ) : (
               <ul className="divide-y border-t">
                 {demo.links.map((l) => (
@@ -186,23 +186,21 @@ export function InviteView() {
             <h2 id="msg-title" className="text-lg font-bold">
               {inv.messagesTitle}
             </h2>
-            <div role="radiogroup" aria-label={inv.messagesTitle} className="mt-4 flex flex-wrap gap-1.5">
+            <ToggleGroup
+              type="single"
+              variant="chip"
+              size="sm"
+              aria-label={inv.messagesTitle}
+              value={String(message)}
+              onValueChange={(v) => v && setMessage(Number(v))}
+              className="mt-4 gap-1.5"
+            >
               {inv.messages.map((m, i) => (
-                <button
-                  key={m.label}
-                  type="button"
-                  role="radio"
-                  aria-checked={message === i}
-                  onClick={() => setMessage(i)}
-                  className={cn(
-                    "inline-flex h-9 items-center rounded-full border px-3.5 text-sm font-bold transition-colors duration-150",
-                    message === i ? "border-foreground bg-foreground text-background" : "border-input hover:bg-muted"
-                  )}
-                >
+                <ToggleGroupItem key={m.label} value={String(i)}>
                   {m.label}
-                </button>
+                </ToggleGroupItem>
               ))}
-            </div>
+            </ToggleGroup>
             <div className="mt-3 rounded-2xl border p-4">
               <p className="text-sm break-words">{messageText}</p>
               <CopyButton text={messageText} label={inv.copyMessage} copiedLabel={inv.copied} failedLabel={inv.copyFailed} size="sm" className="mt-3" />

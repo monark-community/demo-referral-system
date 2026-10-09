@@ -81,14 +81,14 @@ export function InviteSheet({ inviteId, onClose }: { inviteId: string | null; on
 
   return (
     <Sheet open={!!invite} onOpenChange={(o) => !o && onClose()}>
-      <SheetContent side="right" closeLabel={app.close} className="w-full gap-0 overflow-y-auto p-0 sm:max-w-md">
+      <SheetContent side="right" closeLabel={app.close} className="overflow-y-auto data-[side=right]:sm:max-w-md">
         {invite ? (
           <>
-            <SheetHeader className="gap-3 border-b px-5 pt-5 pb-4 text-left sm:px-6">
+            <SheetHeader className="gap-3 border-b px-5 pt-5 pb-4 sm:px-6">
               <div className="flex items-center gap-3 pr-10">
                 <InviteeAvatar name={invite.name} address={invite.address} size={44} />
                 <div className="min-w-0">
-                  <SheetTitle className="truncate text-xl font-extrabold">{displayName}</SheetTitle>
+                  <SheetTitle className="truncate text-xl">{displayName}</SheetTitle>
                   <SheetDescription asChild>
                     <div className="mt-1">
                       <StatusBadge status={status} label={app.status[status]} />

@@ -16,9 +16,10 @@ import { notFound } from "next/navigation"
 
 import { TrustGauge } from "@/components/diagrams/trust-gauge"
 import { HeroNetwork } from "@/components/home/hero-network"
-import { SectionDivider } from "@/components/site/section-divider"
+import { SectionDivider } from "@/components/ui/section-divider"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Button } from "@/components/ui/button"
+import { SectionHeading } from "@/components/ui/section-heading"
 import { href, isLocale } from "@/i18n/config"
 import { getDictionary } from "@/i18n"
 import { pageMetadata } from "@/lib/metadata"
@@ -88,20 +89,21 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
         </div>
       </section>
 
-      <SectionDivider />
+      <SectionDivider contained />
 
       {/* Steps */}
       <section aria-labelledby="steps-title" className="border-y bg-secondary/40">
         <div className="mx-auto w-full max-w-6xl px-4 py-14 sm:px-6 lg:py-20">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-            <h2 id="steps-title" className="max-w-xl text-3xl font-bold tracking-display sm:text-[2rem]">
-              {d.steps.title}
-            </h2>
-            <Link href={href(locale, "/how-it-works")} className="inline-flex min-h-11 items-center gap-1.5 font-bold text-primary-ink underline underline-offset-4">
-              {d.steps.more}
-              <ArrowRightIcon className="size-4" aria-hidden="true" />
-            </Link>
-          </div>
+          <SectionHeading
+            title={d.steps.title}
+            titleId="steps-title"
+            action={
+              <Link href={href(locale, "/how-it-works")} className="inline-flex min-h-11 items-center gap-1.5 font-bold text-primary-ink underline underline-offset-4">
+                {d.steps.more}
+                <ArrowRightIcon className="size-4" aria-hidden="true" />
+              </Link>
+            }
+          />
           <ol className="relative mt-10 grid gap-8 md:grid-cols-4 md:gap-6">
             {/* The line the steps sit on (line art, flat orange) */}
             <span aria-hidden="true" className="absolute top-6 right-[12%] left-[12%] hidden h-0.5 rounded-full bg-primary md:block" />
@@ -128,9 +130,7 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
       {/* Hard to game */}
       <section aria-labelledby="guard-title" className="mx-auto grid w-full max-w-6xl gap-10 px-4 py-14 sm:px-6 lg:grid-cols-2 lg:items-center lg:py-20">
         <div>
-          <h2 id="guard-title" className="text-3xl font-bold tracking-display sm:text-[2rem]">
-            {d.guard.title}
-          </h2>
+          <SectionHeading title={d.guard.title} titleId="guard-title" />
           <ul className="mt-8 flex flex-col gap-3">
             {d.guard.rules.map((rule) => (
               <li key={rule} className="flex items-start gap-3 font-semibold">
@@ -181,9 +181,7 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
 
       {/* Audiences */}
       <section aria-labelledby="who-title" className="mx-auto w-full max-w-6xl px-4 pb-14 sm:px-6 lg:pb-20">
-        <h2 id="who-title" className="max-w-2xl text-3xl font-bold tracking-display sm:text-[2rem]">
-          {d.audiences.title}
-        </h2>
+        <SectionHeading title={d.audiences.title} titleId="who-title" className="max-w-2xl" />
         <ul className="mt-10 grid gap-6 md:grid-cols-3">
           {d.audiences.items.map((item, i) => {
             const photo = photos[i]!
@@ -209,14 +207,12 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
 
       {/* FAQ */}
       <section aria-labelledby="faq-title" className="mx-auto w-full max-w-3xl px-4 py-14 sm:px-6 lg:py-20">
-        <h2 id="faq-title" className="text-3xl font-bold tracking-display sm:text-[2rem]">
-          {d.faq.title}
-        </h2>
-        <Accordion type="single" collapsible className="mt-8 border-t">
+        <SectionHeading title={d.faq.title} titleId="faq-title" />
+        <Accordion type="single" collapsible variant="plus" className="mt-8 border-y">
           {d.faq.items.map((item, i) => (
             <AccordionItem key={item.q} value={`q${i}`}>
-              <AccordionTrigger className="min-h-14 text-base font-bold hover:no-underline">{item.q}</AccordionTrigger>
-              <AccordionContent className="text-base text-muted-foreground">{item.a}</AccordionContent>
+              <AccordionTrigger>{item.q}</AccordionTrigger>
+              <AccordionContent>{item.a}</AccordionContent>
             </AccordionItem>
           ))}
         </Accordion>

@@ -4,12 +4,13 @@ import { ChevronRightIcon } from "lucide-react"
 import { useState } from "react"
 
 import { Button } from "@/components/ui/button"
+import { Empty } from "@/components/ui/empty"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { t } from "@/i18n/t"
 import { inviteStatus, reachedCount, sortedInvites } from "@/lib/demo/selectors"
 import { useDemo } from "@/lib/demo/store"
 import type { InviteStatus } from "@/lib/demo/types"
 import { formatRelative, shortAddress } from "@/lib/format"
-import { cn } from "@/lib/utils"
 
 import { useAppCopy } from "./app-provider"
 import { InviteeAvatar } from "./invitee-avatar"
@@ -38,28 +39,31 @@ export function InviteList({ onOpen }: { onOpen: (id: string) => void }) {
         <h2 id="invites-title" className="text-lg font-bold">
           {inv.title}
         </h2>
-        <div role="group" aria-label={inv.filterLabel} className="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1">
+        <ToggleGroup
+          type="single"
+          variant="chip"
+          size="sm"
+          aria-label={inv.filterLabel}
+          value={filter}
+          onValueChange={(v) => v && setFilter(v as Filter)}
+          className="-mx-1 w-auto flex-nowrap gap-1.5 overflow-x-auto px-1 pb-1"
+        >
           {FILTERS.map((f) => (
-            <button
-              key={f}
-              type="button"
-              aria-pressed={filter === f}
-              onClick={() => setFilter(f)}
-              className={cn(
-                "inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border px-3.5 text-sm font-bold transition-colors duration-150",
-                filter === f ? "border-foreground bg-foreground text-background" : "border-input text-foreground hover:bg-muted"
-              )}
-            >
+            <ToggleGroupItem key={f} value={f}>
               {inv.filters[f]}
-              <span className={cn("text-xs tabular-nums", filter === f ? "text-background/80" : "text-muted-foreground")}>{counts[f]}</span>
-            </button>
+              <span className="text-xs text-muted-foreground tnum">{counts[f]}</span>
+            </ToggleGroupItem>
           ))}
-        </div>
+        </ToggleGroup>
       </div>
       {all.length === 0 ? (
-        <p className="m-5 rounded-2xl border border-dashed p-4 text-sm text-muted-foreground sm:m-6">{inv.empty}</p>
+        <Empty align="start" size="sm" className="m-5 w-auto sm:m-6">
+          {inv.empty}
+        </Empty>
       ) : rows.length === 0 ? (
-        <p className="m-5 rounded-2xl border border-dashed p-4 text-sm text-muted-foreground sm:m-6">{inv.emptyFilter}</p>
+        <Empty align="start" size="sm" role="status" className="m-5 w-auto sm:m-6">
+          {inv.emptyFilter}
+        </Empty>
       ) : (
         <ul className="divide-y">
           {rows.map((i) => {

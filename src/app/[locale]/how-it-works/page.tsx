@@ -1,12 +1,14 @@
-import { ArrowRightIcon, BanIcon, ChevronRightIcon, CloudIcon, LinkIcon, RepeatIcon, UserRoundCheckIcon } from "lucide-react"
+import { ArrowRightIcon, BanIcon, CloudIcon, LinkIcon, RepeatIcon, UserRoundCheckIcon } from "lucide-react"
 import type { Metadata } from "next"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 
 import { RecordDiagram } from "@/components/diagrams/record-diagram"
 import { TrustGauge } from "@/components/diagrams/trust-gauge"
-import { SectionDivider } from "@/components/site/section-divider"
+import { SectionDivider } from "@/components/ui/section-divider"
 import { Button } from "@/components/ui/button"
+import { Disclosure } from "@/components/ui/disclosure"
+import { SectionHeading } from "@/components/ui/section-heading"
 import { href, isLocale } from "@/i18n/config"
 import { getDictionary, t } from "@/i18n"
 import { MILESTONES } from "@/lib/demo/program"
@@ -55,12 +57,7 @@ export default async function HowItWorks({ params }: PageProps<"/[locale]/how-it
 
       {/* 1. Record */}
       <section aria-labelledby="record-title" className="mx-auto grid w-full max-w-6xl gap-8 px-4 pb-14 sm:px-6 lg:grid-cols-[5fr_7fr] lg:items-center">
-        <div>
-          <h2 id="record-title" className="text-3xl font-bold tracking-display">
-            {d.record.title}
-          </h2>
-          <p className="mt-3 text-muted-foreground">{d.record.body}</p>
-        </div>
+        <SectionHeading title={d.record.title} titleId="record-title" lead={d.record.body} />
         <RecordDiagram labels={d.record.diagram} />
         <ul className="grid gap-4 sm:grid-cols-3 lg:col-span-2">
           {d.record.rules.map((r, i) => {
@@ -76,14 +73,11 @@ export default async function HowItWorks({ params }: PageProps<"/[locale]/how-it
         </ul>
       </section>
 
-      <SectionDivider />
+      <SectionDivider contained />
 
       {/* 2. Milestones */}
       <section aria-labelledby="ms-title" className="mx-auto w-full max-w-6xl px-4 py-14 sm:px-6">
-        <h2 id="ms-title" className="text-3xl font-bold tracking-display">
-          {d.milestones.title}
-        </h2>
-        <p className="mt-3 max-w-2xl text-muted-foreground">{d.milestones.body}</p>
+        <SectionHeading title={d.milestones.title} titleId="ms-title" lead={d.milestones.body} />
         <div className="mt-6 overflow-hidden rounded-3xl border bg-card">
           <table className="w-full text-left text-sm sm:text-base">
             <thead className="border-b bg-muted/50 text-xs font-bold text-muted-foreground sm:text-sm">
@@ -122,10 +116,7 @@ export default async function HowItWorks({ params }: PageProps<"/[locale]/how-it
       <section aria-labelledby="trust-title" className="border-y bg-secondary/40">
         <div className="mx-auto grid w-full max-w-6xl gap-8 px-4 py-14 sm:px-6 lg:grid-cols-[5fr_7fr]">
           <div>
-            <h2 id="trust-title" className="text-3xl font-bold tracking-display">
-              {d.trust.title}
-            </h2>
-            <p className="mt-3 text-muted-foreground">{d.trust.body}</p>
+            <SectionHeading title={d.trust.title} titleId="trust-title" lead={d.trust.body} />
             <div className="mt-6 flex items-center gap-6 rounded-2xl border bg-card p-5">
               <TrustGauge score={18} held label={dict.app.trust.title} status={d.trust.threshold} className="w-32 shrink-0" />
               <p className="text-sm">{d.trust.example}</p>
@@ -160,9 +151,7 @@ export default async function HowItWorks({ params }: PageProps<"/[locale]/how-it
 
       {/* 4. On/off chain */}
       <section aria-labelledby="chain-title" className="mx-auto w-full max-w-6xl px-4 py-14 sm:px-6">
-        <h2 id="chain-title" className="text-3xl font-bold tracking-display">
-          {d.chain.title}
-        </h2>
+        <SectionHeading title={d.chain.title} titleId="chain-title" />
         <div className="mt-6 grid gap-4 md:grid-cols-2">
           <div className="rounded-2xl border-2 border-primary bg-card p-6">
             <h3 className="flex items-center gap-2 text-lg font-bold">
@@ -191,20 +180,13 @@ export default async function HowItWorks({ params }: PageProps<"/[locale]/how-it
 
       {/* 5. Developers */}
       <section aria-labelledby="dev-title" className="mx-auto w-full max-w-6xl px-4 pb-14 sm:px-6">
-        <h2 id="dev-title" className="text-3xl font-bold tracking-display">
-          {d.dev.title}
-        </h2>
-        <p className="mt-3 max-w-2xl text-muted-foreground">{d.dev.body}</p>
+        <SectionHeading title={d.dev.title} titleId="dev-title" lead={d.dev.body} />
         {/* Context on demand: the code sits behind a disclosure. */}
-        <details className="group mt-6">
-          <summary className="inline-flex min-h-11 cursor-pointer list-none items-center gap-1.5 font-bold text-primary-ink underline underline-offset-4 [&::-webkit-details-marker]:hidden">
-            <ChevronRightIcon className="size-4 transition-transform duration-150 group-open:rotate-90" aria-hidden="true" />
-            {d.dev.show}
-          </summary>
-          <pre className="mt-4 overflow-x-auto rounded-2xl border bg-foreground p-5 text-[13px] leading-relaxed text-background" tabIndex={0}>
+        <Disclosure variant="pill" summary={d.dev.show} className="mt-6">
+          <pre className="overflow-x-auto rounded-2xl border bg-foreground p-5 text-[13px] leading-relaxed text-background" tabIndex={0}>
             <code translate="no">{EVENTS}</code>
           </pre>
-        </details>
+        </Disclosure>
       </section>
 
       <section className="mx-auto w-full max-w-6xl px-4 pb-16 sm:px-6 lg:pb-24">

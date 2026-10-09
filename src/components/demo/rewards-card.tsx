@@ -3,6 +3,7 @@
 import { useState } from "react"
 
 import { Button } from "@/components/ui/button"
+import { Empty } from "@/components/ui/empty"
 import { TokenAmount } from "@/components/ui/token-amount"
 import { intlLocale } from "@/i18n/config"
 import { t } from "@/i18n/t"
@@ -60,6 +61,7 @@ export function RewardsCard() {
           decimals={REWARD_DECIMALS}
           symbol={REWARD_SYMBOL}
           fractionDigits={2}
+          minFractionDigits={2}
           mono
           locale={intlLocale[locale]}
           className="mt-1 text-3xl font-extrabold"
@@ -81,7 +83,9 @@ export function RewardsCard() {
             {t(r.claim, { amount: formatReward(claimable, locale) })}
           </Button>
         ) : (
-          <p className="rounded-2xl border border-dashed p-4 text-sm text-muted-foreground">{r.empty}</p>
+          <Empty align="start" size="sm">
+            {r.empty}
+          </Empty>
         )}
         <AppTxFeedback state={tx.state} pendingLabel={r.pending} confirmedLabel={claimedText} onRetry={claimable > 0n ? claim : undefined} onDismiss={tx.reset} />
       </div>

@@ -7,6 +7,7 @@ import { useEffect, useMemo, useRef, useState } from "react"
 
 import { TrustGauge } from "@/components/diagrams/trust-gauge"
 import { Button } from "@/components/ui/button"
+import { RadioGroup, RadioGroupItem, RadioGroupItemDescription, RadioGroupItemTitle } from "@/components/ui/radio-group"
 import { WalletAvatar } from "@/components/ui/wallet"
 import { href } from "@/i18n/config"
 import { t } from "@/i18n/t"
@@ -218,39 +219,33 @@ export function JoinView({ code }: { code: string }) {
           <h2 id="persona-title" className="text-lg font-bold">
             {join.personas.title}
           </h2>
-          <div role="radiogroup" aria-label={join.personas.label} className="mt-4 flex flex-col gap-2">
+          <RadioGroup
+            variant="card"
+            aria-label={join.personas.label}
+            value={persona}
+            disabled={tx.busy || !!result}
+            onValueChange={(id) => {
+              setPersona(id as PersonaId)
+              tx.reset()
+            }}
+            className="mt-4"
+          >
             {PERSONAS.map((id) => {
               const p = join.personas[id]
               const cand = candidates[id]
-              const checked = persona === id
               return (
-                <button
-                  key={id}
-                  type="button"
-                  role="radio"
-                  aria-checked={checked}
-                  disabled={tx.busy || !!result}
-                  onClick={() => {
-                    setPersona(id)
-                    tx.reset()
-                  }}
-                  className={cn(
-                    "flex items-center gap-3 rounded-2xl border bg-card p-3 text-left transition-colors duration-150 disabled:opacity-60",
-                    checked ? "border-primary ring-2 ring-primary/40" : "hover:bg-muted/60"
-                  )}
-                >
-                  <span className={cn("flex size-5 shrink-0 items-center justify-center rounded-full border-2", checked ? "border-primary" : "border-input")}>
-                    {checked ? <span className="size-2.5 rounded-full bg-primary" /> : null}
+                <RadioGroupItem key={id} value={id} className="items-center">
+                  <span className="flex min-w-0 items-center gap-3">
+                    {cand ? <WalletAvatar address={cand.address} size={32} /> : <span className="size-8 shrink-0 rounded-full bg-muted" />}
+                    <span className="flex min-w-0 flex-col gap-0.5">
+                      <RadioGroupItemTitle>{p.title}</RadioGroupItemTitle>
+                      <RadioGroupItemDescription>{t(p.body, { name: friend?.name ?? "" })}</RadioGroupItemDescription>
+                    </span>
                   </span>
-                  {cand ? <WalletAvatar address={cand.address} size={32} /> : <span className="size-8 shrink-0 rounded-full bg-muted" />}
-                  <span className="min-w-0">
-                    <span className="block font-bold">{p.title}</span>
-                    <span className="block text-xs text-muted-foreground">{t(p.body, { name: friend?.name ?? "" })}</span>
-                  </span>
-                </button>
+                </RadioGroupItem>
               )
             })}
-          </div>
+          </RadioGroup>
         </section>
       </div>
     </div>
