@@ -20,9 +20,8 @@ import type { BlockReason, Invite, TrustSignal } from "@/lib/demo/types"
 import { shortAddress } from "@/lib/format"
 import { cn } from "@/lib/utils"
 
-import { AppLoading } from "./app-frame"
-import { useAppCopy } from "./app-provider"
-import { TxFeedback } from "./tx-feedback"
+import { AppLoading } from "@/components/ui/app-loading"
+import { AppTxFeedback, useAppCopy } from "./app-provider"
 
 interface Candidate {
   name: string
@@ -180,7 +179,7 @@ export function JoinView({ code }: { code: string }) {
                 </div>
                 <TrustGauge score={score} held={held} label={app.trust.title} status={held ? app.trust.held : app.trust.eligible} className="w-32 shrink-0 self-center" />
               </div>
-              <TxFeedback state={tx.state} className="mt-3" />
+              <AppTxFeedback state={tx.state} className="mt-3" />
               <div className="mt-4 flex flex-col gap-2 sm:flex-row">
                 <Button asChild>
                   <Link href={href(locale, "/app")}>
@@ -203,7 +202,7 @@ export function JoinView({ code }: { code: string }) {
                 {c.accept}
               </Button>
               <p className="text-xs text-muted-foreground">{c.privacy}</p>
-              <TxFeedback state={tx.state} onRetry={blocked ? undefined : accept} onDismiss={tx.reset} />
+              <AppTxFeedback state={tx.state} onRetry={blocked ? undefined : accept} onDismiss={tx.reset} />
               {blocked ? (
                 <Button variant="outline" size="sm" className="self-start" onClick={again}>
                   <XCircleIcon aria-hidden="true" />

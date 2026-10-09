@@ -17,10 +17,9 @@ import { getDemo, useDemo } from "@/lib/demo/store"
 import { formatDate, formatReward, shortAddress, shortHash } from "@/lib/format"
 import { cn } from "@/lib/utils"
 
-import { useAppCopy } from "./app-provider"
+import { AppTxFeedback, useAppCopy } from "./app-provider"
 import { InviteeAvatar } from "./invitee-avatar"
 import { StatusBadge } from "./status-badge"
-import { TxFeedback } from "./tx-feedback"
 
 /** Everything about one invite: status, trust score and signals, milestone timeline, and the next-milestone simulation. */
 export function InviteSheet({ inviteId, onClose }: { inviteId: string | null; onClose: () => void }) {
@@ -209,12 +208,12 @@ export function InviteSheet({ inviteId, onClose }: { inviteId: string | null; on
                   <Button className="mt-3 w-full sm:w-auto" onClick={simulate} disabled={tx.busy}>
                     {app.milestones[next].action}
                   </Button>
-                  <TxFeedback state={tx.state} className="mt-3" onRetry={simulate} onDismiss={tx.reset} />
+                  <AppTxFeedback state={tx.state} className="mt-3" onRetry={simulate} onDismiss={tx.reset} />
                 </section>
               ) : status === "completed" ? (
                 <p className="rounded-2xl border bg-secondary/50 p-4 text-sm font-semibold">{t(s.completeNote, { name: displayName })}</p>
               ) : null}
-              {!next && tx.state.phase === "confirmed" ? <TxFeedback state={tx.state} /> : null}
+              {!next && tx.state.phase === "confirmed" ? <AppTxFeedback state={tx.state} /> : null}
             </div>
           </>
         ) : null}

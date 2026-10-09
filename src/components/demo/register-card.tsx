@@ -6,8 +6,7 @@ import { Button } from "@/components/ui/button"
 import { useTx } from "@/lib/demo/chain"
 import { applyRegister } from "@/lib/demo/ops"
 
-import { useAppCopy } from "./app-provider"
-import { TxFeedback } from "./tx-feedback"
+import { AppTxFeedback, useAppCopy } from "./app-provider"
 
 /** Fresh start: the wallet joins the program in one transaction, which creates its referral link. */
 export function RegisterCard() {
@@ -30,7 +29,7 @@ export function RegisterCard() {
       <Button size="lg" className="mt-7 w-full sm:w-auto" onClick={register} disabled={tx.busy}>
         {r.button}
       </Button>
-      <TxFeedback state={tx.state} pendingLabel={r.pending} className="mt-4" onRetry={register} onDismiss={tx.reset} />
+      <AppTxFeedback state={tx.state} pendingLabel={r.pending} className="mt-4" onRetry={register} onDismiss={tx.reset} />
     </section>
   )
 }

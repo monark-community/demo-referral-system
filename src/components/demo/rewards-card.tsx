@@ -13,8 +13,7 @@ import { totals } from "@/lib/demo/selectors"
 import { getDemo, useDemo } from "@/lib/demo/store"
 import { formatReward, shortAddress } from "@/lib/format"
 
-import { useAppCopy } from "./app-provider"
-import { TxFeedback } from "./tx-feedback"
+import { AppTxFeedback, useAppCopy } from "./app-provider"
 
 /** Claimable, claimed and held tUSDC, with the claim transaction (flow 5). */
 export function RewardsCard() {
@@ -84,7 +83,7 @@ export function RewardsCard() {
         ) : (
           <p className="rounded-2xl border border-dashed p-4 text-sm text-muted-foreground">{r.empty}</p>
         )}
-        <TxFeedback state={tx.state} pendingLabel={r.pending} confirmedLabel={claimedText} onRetry={claimable > 0n ? claim : undefined} onDismiss={tx.reset} />
+        <AppTxFeedback state={tx.state} pendingLabel={r.pending} confirmedLabel={claimedText} onRetry={claimable > 0n ? claim : undefined} onDismiss={tx.reset} />
       </div>
       <p className="mt-4 text-xs text-muted-foreground">
         {t(r.pool, { used: formatReward(used, locale), total: formatReward(PROGRAM.poolTotal, locale) })}
