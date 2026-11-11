@@ -15,7 +15,7 @@ This repository is the **interactive demo site**: a Next.js app with simulated w
 
 ## Run it locally
 
-Requirements: Node.js 22 and pnpm 10.
+Requirements: Node.js 22.23.4 or newer on the 22 line, and pnpm 10.
 
 ```bash
 pnpm install
@@ -83,7 +83,7 @@ Stack: Next.js 16 (App Router, TypeScript strict), Tailwind CSS 4, shadcn/ui on 
 
 ## Deploy to Vercel
 
-Import the repository in Vercel and deploy with the framework defaults (Next.js, `pnpm install`, `pnpm build`). No `vercel.json` and no environment variables are required; Node 22 is pinned in `package.json` `engines`.
+Import the repository in Vercel and deploy with the framework defaults (Next.js, `pnpm install`, `pnpm build`). No `vercel.json` and no environment variables are required; Node 22 is pinned in `package.json` `engines`. `pnpm build` and `pnpm start` stop on a Node.js release exposed to CVE-2026-111497, so use 22.23.4 or newer.
 
 ## License and credits
 
